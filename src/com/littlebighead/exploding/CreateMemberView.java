@@ -12,6 +12,7 @@ import uk.ac.horizon.ug.exploding.client.MessageStatusType;
 import uk.ac.horizon.ug.exploding.client.R;
 import uk.ac.horizon.ug.exploding.client.Client.QueuedMessage;
 import uk.ac.horizon.ug.exploding.client.model.Member;
+import uk.ac.horizon.ug.exploding.client.model.Player;
 import uk.ac.horizon.ug.exploding.client.model.Position;
 
 import android.app.Activity;
@@ -147,6 +148,27 @@ public class CreateMemberView extends Activity implements ClientMessageListener 
 		createMemberMessage = null;
 		cache = null;
 	}
+	static final int DEFAULT_COLOR = 0xff0000ff;
+	/**
+	 * @return
+	 */
+	private int getPlayerColor() {
+		// TODO Auto-generated method stub
+		ClientState cs = BackgroundThread.getClientState(this);
+		if (cs==null)
+			return DEFAULT_COLOR;
+		Client cache = cs.getCache();
+		if (cache==null)
+			return DEFAULT_COLOR;
+		Player player = (Player)cache.getFirstFact(Player.class.getName());
+		if (player==null)
+			return DEFAULT_COLOR;
+		if (!player.isSetColourRef()) {
+			Log.d(TAG,"Player colourRef unset");
+			return DEFAULT_COLOR;
+		}
+		return PlayerColours.values()[player.getColourRef() % PlayerColours.values().length].color();
+	}
 	// END CMG
 	
     /** Called when the activity is first created. */
@@ -223,7 +245,7 @@ public class CreateMemberView extends Activity implements ClientMessageListener 
         	
         }
         
-        drawView = new DrawView(this, buttons);
+        drawView = new DrawView(this, getPlayerColor(), buttons);
         drawView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, 600));
         mainLayout.addView(drawView);
         drawView.requestFocus();

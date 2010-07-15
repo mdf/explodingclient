@@ -103,7 +103,7 @@ public class CommunityView extends Activity implements ClientStateListener {	//i
     private class OnReadyListener implements CommunityPropsDialog.ReadyListener {
         @Override
         public void ready(String name) {
-            Toast.makeText(CommunityView.this, name, Toast.LENGTH_LONG).show();
+            //Toast.makeText(CommunityView.this, name, Toast.LENGTH_LONG).show();
         }
     }
     

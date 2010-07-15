@@ -36,6 +36,7 @@ public class CommunityPropsDialog extends Dialog {
             ReadyListener readyListener) {
         super(context);
         this.name = member.getName();
+        this.member = member;
         this.readyListener = readyListener;
     }
 
@@ -73,10 +74,10 @@ public class CommunityPropsDialog extends Dialog {
 	 */
 	private void setWidths(TextView[] ets, Integer pval) {
 		int val = pval!=null ? pval.intValue() : 0;
-        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ets[0].getLayoutParams());
+        ViewGroup.LayoutParams params = /*new ViewGroup.LayoutParams*/(ets[0].getLayoutParams());
         params.width = MAX_WIDTH*val/10;
         ets[0].setLayoutParams(params);
-        params = new ViewGroup.LayoutParams(ets[1].getLayoutParams());
+        params = /*new ViewGroup.LayoutParams*/(ets[1].getLayoutParams());
         params.width = MAX_WIDTH*(10-val)/10;
         ets[1].setLayoutParams(params);
 	}

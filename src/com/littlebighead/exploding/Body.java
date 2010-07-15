@@ -18,8 +18,10 @@ public class Body {
 	final private static int limbCnt = 5;
 	private Canvas canvas;
 	public static Bitmap bitmap;
+	private int color;
 	
-	public Body() {
+	public Body(int color) {
+		this.color = color;
 		limbs = new Limb[limbCnt];
 		
 		double width = Math.random() * 100.0d + 55.0d;
@@ -40,7 +42,7 @@ public class Body {
 			l.draw(canvas);
 		}
         ShapeDrawable mDrawable = new ShapeDrawable(new OvalShape());
-        mDrawable.getPaint().setColor(0x7fff0000);
+        mDrawable.getPaint().setColor(color/*0x7fff0000*/);
         mDrawable.getPaint().setStyle(Style.STROKE);
         mDrawable.setBounds(-5, -5,5, 5);
         mDrawable.draw(canvas);

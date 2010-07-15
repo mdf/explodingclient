@@ -454,6 +454,16 @@ public class Client {
 	public HashMap<String,HashMap<Object,Object>> getFacts() {
 		return facts;
 	}
+	public Object getFirstFact(String typeName) {
+		synchronized (facts) {
+			HashMap<Object,Object> typeFacts = facts.get(typeName);
+			if (typeFacts!=null && typeFacts.size()>0) {
+				return typeFacts.values().iterator().next();
+			}
+			return null;
+		}
+		
+	}
 	public List<Object> getFacts(String typeName) {
 		
 		synchronized (facts) {

@@ -30,7 +30,7 @@ public class DrawView extends View implements OnTouchListener {
     // cmg
     private Button buttons[];
     // end cmg
-    public DrawView(Context context, Button buttons[]) {
+    public DrawView(Context context, int color, Button buttons[]) {
         super(context);
         this.buttons = buttons;
         
@@ -42,7 +42,7 @@ public class DrawView extends View implements OnTouchListener {
         paint.setColor(Color.WHITE);
         paint.setAntiAlias(true);
  
-        body = new Body();
+        body = new Body(color);
 
         updateButtons();
     }

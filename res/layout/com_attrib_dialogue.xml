@@ -184,7 +184,7 @@
     	android:layout_marginRight="20px"
     	android:layout_marginBottom="10px">
 	    <Button
-android:text="OK"
+android:text="Go to map"
 android:typeface="serif"
 android:layout_height="fill_parent"
 android:layout_width="fill_parent" android:id="@+id/dismiss_member_props">
