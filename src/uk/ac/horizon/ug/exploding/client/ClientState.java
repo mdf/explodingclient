@@ -99,7 +99,6 @@ public class ClientState {
 		this.zoneOrgID = zoneOrgID;
 		this.zoneChanged = zoneChanged;
 		this.cache = cache;
-		this.changedTypes = changedTypes;
 		// copy
 		this.changedTypes.addAll(changedTypes);
 	}

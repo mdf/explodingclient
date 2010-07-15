@@ -19,10 +19,15 @@
  */
 package uk.ac.horizon.ug.exploding.client;
 
+import com.littlebighead.exploding.Body;
+import com.littlebighead.exploding.CommunityView;
+import com.littlebighead.exploding.Limb;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import uk.ac.horizon.ug.exploding.client.model.Game;
 import uk.ac.horizon.ug.exploding.client.model.Member;
 import uk.ac.horizon.ug.exploding.client.model.Message;
 import uk.ac.horizon.ug.exploding.client.model.Player;
@@ -40,6 +45,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -47,18 +53,24 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.WindowManager;
+import android.view.View.OnClickListener;
 import android.view.animation.BounceInterpolator;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
  * @author cmg
+ * @author Robin
  *
  */
 public class GameMapActivity extends MapActivity implements ClientStateListener {
 
 	private static final String TAG = "Map";
 	private static final int MILLION = 1000000;
-	private static final int MIN_ZOOM_LEVEL = 14;
+	private static final int MIN_ZOOM_LEVEL = 19;// Robin Default
 	private MyLocationOverlay myLocationOverlay;
 	private MyMapOverlay itemOverlay;
 	
@@ -69,7 +81,46 @@ public class GameMapActivity extends MapActivity implements ClientStateListener 
 		try {
 			Log.d(TAG, "Try to load map view");
 			setContentView(R.layout.map);
+			// BEGIN Robin's code - from com.littlebighead.exploding.GameMapView
+	        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			MapView mapView = (MapView)findViewById(R.id.map_view);
+	        mapView.setReticleDrawMode(MapView.ReticleDrawMode.DRAW_RETICLE_OVER);
+			Button button = (Button)findViewById(R.id.map_story_button);
+
+			//button.setOnClickListener(this);
+			button.setOnClickListener(new OnClickListener() {
+			    public void onClick(View v) {
+			    	if (canAuthor()) {
+			    		Intent myIntent = new Intent();
+			    		myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.AddStoryView");
+			    		startActivity(myIntent);
+			    	}
+				}
+			});
+			
+			button = (Button)findViewById(R.id.map_community_button);
+//			button.setOnClickListener(this);
+			button.setOnClickListener(new OnClickListener() {
+			    public void onClick(View v) {
+					Intent myIntent = new Intent();
+					myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.CommunityView");
+					startActivity(myIntent);
+				}
+			});
+
+			button = (Button)findViewById(R.id.map_create_button);
+//			button.setOnClickListener(this);
+			button.setOnClickListener(new OnClickListener() {
+			    public void onClick(View v) {
+			    	if (canCreateMember()) {
+			    		Intent myIntent = new Intent();
+			    		myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.CreateMemberView");
+			    		startActivityForResult(myIntent,1);
+			    	}
+				}
+			});
+
+			// END Robin's code
 			mapView.setBuiltInZoomControls(true);
 			myLocationOverlay = new MyLocationOverlay(this, mapView);
 			mapView.getOverlays().add(myLocationOverlay);
@@ -92,19 +143,65 @@ public class GameMapActivity extends MapActivity implements ClientStateListener 
 		}
 		Set<String> types = new HashSet<String>();
 		types.add(Message.class.getName());
+		types.add(Game.class.getName());
+		types.add(Member.class.getName());
 		BackgroundThread.addClientStateListener(this, this, ClientState.Part.ZONE.flag(), types);
 		ClientState clientState = BackgroundThread.getClientState(this);
-		clientStateChanged(clientState);
+		clientStateChanged(clientState, true);
+		centreOnMyLocation();
 	}
 	private static final long ZONE_VIBRATE_MS = 500;
 
+	private String currentYear = null;
+	
 	@Override
 	public void clientStateChanged(final ClientState clientState) {
+		clientStateChanged(clientState, false);
+	}
+	
+	public void clientStateChanged(final ClientState clientState, boolean isInitial) {
 		if (clientState==null)
 			return;
-		if (clientState.isZoneChanged())
+		if (clientState.isZoneChanged() || !isInitial)
 			zoneChanged(clientState.getZoneID());
-		handleMessages(clientState);
+		if (isInitial || clientState.getChangedTypes().contains(Message.class.getName()))
+			handleMessages(clientState);
+		if (isInitial || clientState.getChangedTypes().contains(Game.class.getName()))
+			checkYear(clientState);
+		if (isInitial || clientState.getChangedTypes().contains(Member.class.getName()))
+			updateMembers(clientState);
+	}
+
+	/**
+	 * @param clientState
+	 */
+	private void updateMembers(ClientState clientState) {
+		Client cache = clientState.getCache();
+		if (cache==null)
+			return;
+		List<Member> members = CommunityView.getMyMembers(clientState);//cache.getFacts(Member.class.getName());
+		TextView membersTextView = (TextView)findViewById(R.id.MemberCntTextView);
+		membersTextView.setText(""+members.size());		
+	}
+
+	/**
+	 * @param clientState
+	 */
+	private void checkYear(ClientState clientState) {
+		// TODO Auto-generated method stub
+		Client cache = clientState.getCache();
+		if (cache==null)
+			return;
+		List<Object> games = cache.getFacts(Game.class.getName());
+		if (games.size()>0) {
+			Game game = (Game)games.get(0);
+			if (game.getYear()!=null && !game.getYear().equals(currentYear)) {
+				// BEGIN ROBIN
+				TextView yearTextView = (TextView)findViewById(R.id.YearTextView);
+				// END ROBIN
+    			yearTextView.setText(game.getYear());
+			}
+		}
 	}
 
 	/**
@@ -117,6 +214,10 @@ public class GameMapActivity extends MapActivity implements ClientStateListener 
 			if (vibrator!=null)
 				vibrator.vibrate(ZONE_VIBRATE_MS);
 			Toast.makeText(GameMapActivity.this, "Entered zone "+zoneID, Toast.LENGTH_SHORT).show();
+			// BEGIN ROBIN
+    		TextView zoneTextView = (TextView)findViewById(R.id.ZoneTextView);
+    		zoneTextView.setText("You are in: "+zoneID);
+    		// END ROBIN
 		}
 	}		
 	/**
@@ -132,16 +233,44 @@ public class GameMapActivity extends MapActivity implements ClientStateListener 
 		
 		for (Object m : messages) {
 			Message message = (Message)m;
-			NotificationUtils.postMessage(this, message);
+			Log.d(TAG, "Message: "+m);
+			//NotificationUtils.postMessage(this, message);
 			clientState.getCache().removeFactSilent(message);
+			// BEGIN ROBIN
+			//if (message.getType())...??
+			Intent myIntent = new Intent();
+			myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.TimeEventDialog");
+			myIntent.putExtra("year", message.getYear());
+			myIntent.putExtra("name", message.getTitle());
+			myIntent.putExtra("desc", message.getDescription());
+			playAudio();
+			startActivity(myIntent);
+			// END ROBIN
 		}
 	}
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-    	MenuInflater inflater = getMenuInflater();    
-    	inflater.inflate(R.menu.map_menu, menu);    
-    	return true;
-	}
+	// BEGIN ROBIN
+	private MediaPlayer mMediaPlayer = null;
+    private void playAudio () {
+        try {
+        	if (mMediaPlayer != null) {
+	        	// http://www.soundjay.com/beep-sounds-1.html lots of free beeps here
+	        	if (mMediaPlayer.isPlaying() == false) {
+		            mMediaPlayer = MediaPlayer.create(this, R.raw.beep);
+		            mMediaPlayer.setLooping(false);
+		            mMediaPlayer.start();
+	        	}
+        	}
+        } catch (Exception e) {
+            Log.e("beep", "error: " + e.getMessage(), e);
+        }
+    }
+	// END ROBIN
+//	@Override
+//	public boolean onCreateOptionsMenu(Menu menu) {
+//    	MenuInflater inflater = getMenuInflater();    
+//    	inflater.inflate(R.menu.map_menu, menu);    
+//    	return true;
+//	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -158,19 +287,8 @@ public class GameMapActivity extends MapActivity implements ClientStateListener 
 		}			
 		case R.id.map_menu_create_member:
 		{
-			// check if we can...
-			Player player = getPlayer();
-			// Oops - this is for events
-			//if (player==null || !player.isSetCanAuthor() || !player.getCanAuthor()) {
-			//	Toast.makeText(this, "You cannot author yet - keep playing", Toast.LENGTH_LONG).show();
-			//	return true;
-			//}
-			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-			boolean standaloneMode = preferences.getBoolean("standaloneMode", false);
-			if (!standaloneMode && (player==null || !player.isSetNewMemberQuota() || player.getNewMemberQuota()<1)) {
-				Toast.makeText(this, "You cannot create a member yet - keep playing", Toast.LENGTH_LONG).show();
+			if (!canCreateMember())
 				return true;
-			}
 			Intent intent = new Intent();
 			intent.setClass(this, CreateMemberActivity.class);
 			startActivity(intent);
@@ -179,7 +297,28 @@ public class GameMapActivity extends MapActivity implements ClientStateListener 
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
+	private boolean canCreateMember() {
+		// check if we can...
+		Player player = getPlayer();
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean standaloneMode = preferences.getBoolean("standaloneMode", false);
+		if (!standaloneMode && (player==null || !player.isSetNewMemberQuota() || player.getNewMemberQuota()<1)) {
+			Toast.makeText(this, "You cannot create a member yet - keep playing", Toast.LENGTH_LONG).show();
+			return false;
+		}
+		return true;
+	}
+	private boolean canAuthor() {
+		// check if we can...
+		Player player = getPlayer();
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean standaloneMode = preferences.getBoolean("standaloneMode", false);
+		if (!standaloneMode && (player==null || !player.isSetCanAuthor() || player.getCanAuthor()==false)) {
+			Toast.makeText(this, "You cannot create a story yet - keep playing", Toast.LENGTH_LONG).show();
+			return false;
+		}
+		return true;
+	}
 	/**
 	 * @return
 	 */
@@ -263,4 +402,23 @@ public class GameMapActivity extends MapActivity implements ClientStateListener 
 //		
 //	}
 
+	
+	// BEGIN ROBIN  com.littlebighead.exploding.GameMapView
+	/** create member activity result */
+    @Override 
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {     
+      super.onActivityResult(requestCode, resultCode, data); 
+      switch(requestCode) { 
+        case (1) : { 
+          if (resultCode == Activity.RESULT_OK) { 
+//        	  ArrayList<Limb> limbs = (ArrayList<Limb>)data.getExtras().get("limbs");
+        	  for (Limb limb: Body.limbs) {
+        		  Log.i("limb position", Double.toString(limb.x));
+        	  }
+          } 
+          break; 
+        } 
+      } 
+    }
+    // END ROBIN
 }

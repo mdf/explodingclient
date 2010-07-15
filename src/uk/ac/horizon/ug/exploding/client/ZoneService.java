@@ -55,6 +55,8 @@ public class ZoneService {
     	for(Object z : zones)
 		{
     		Zone zone = (Zone)z;
+    		if ("Main".equals(zone.getName()))
+    			continue;
     		Position ps [] = zone.getCoordinates();
     		if (polygonContains(ps, latitude, longitude)){
     			return zone;

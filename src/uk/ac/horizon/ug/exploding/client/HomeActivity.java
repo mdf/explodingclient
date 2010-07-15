@@ -39,6 +39,8 @@ import android.view.MenuInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
@@ -57,7 +59,10 @@ import android.widget.Toast;
  * - show only view ("Start" button enabled to restart)
  * - show "Start new 
  * 
+ * Included stuff from com.littlebighead.exploding.ExplodingPlaces
+ * 
  * @author cmg
+ * @author robin
  *
  */
 public class HomeActivity extends Activity implements ClientStateListener {
@@ -66,6 +71,13 @@ public class HomeActivity extends Activity implements ClientStateListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // BEGIN ROBIN
+    	this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+    	
+    	getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        // END ROBIN
         BackgroundThread.setHandler(handler);
         setContentView(R.layout.main);
         Button start_button = (Button)findViewById(R.id.main_start_button);

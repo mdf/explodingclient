@@ -7,7 +7,7 @@
     <string name="main_menu_retry_short">Retry</string>
     <string name="main_menu_retry">Retry server</string>
     <string name="hello">Hello World, HomeActivity!</string>
-    <string name="app_name">ExplodingPlaces</string>
+    <string name="app_name">Exploding Places</string>
 
 <string-array name="preferences_poll_interval_names"><item>Short (5s)</item>
 <item>Medium (15s)</item>

@@ -1,8 +1,10 @@
 package uk.ac.horizon.ug.exploding.client;
 
 import uk.ac.horizon.ug.exploding.client.model.Member;
+import uk.ac.horizon.ug.exploding.client.model.Player;
 import uk.ac.horizon.ug.exploding.client.model.Position;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import android.graphics.drawable.Drawable;
@@ -52,8 +54,23 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 	public synchronized void clientStateChanged(final ClientState clientState) {
 		if (clientState==null  || clientState.getCache()==null) 
 			members = null;
-		else {
-			members = clientState.getCache().getFacts(Member.class.getName());
+		else {	
+			Client cache = clientState.getCache();
+			List<Object> ps = cache.getFacts(Player.class.getName());
+			Player player = null;
+			if (ps.size()==0) 
+				members = null;
+			else {
+ 				player = (Player)ps.get(0);
+			
+ 				List<Object> allMembers = clientState.getCache().getFacts(Member.class.getName());
+ 				members = new LinkedList<Object>();
+ 				for (Object m : allMembers) {
+ 					Member member = (Member)m;
+ 					if (player.getID().equals(member.getPlayerID()) && !member.getCarried())
+ 						members.add(member);
+ 				}
+			}
 		}
 		Log.d(TAG,"Members changed: "+size()+" found");
 		populate();		

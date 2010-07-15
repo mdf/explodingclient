@@ -5,6 +5,24 @@
     android:layout_height="fill_parent"
     >
     
+<ScrollView android:layout_width="fill_parent" android:layout_height="fill_parent" android:fillViewport="true" android:scrollbars="vertical">
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+<!--  BEGIN from Robin res/layout/start.xml -->
+<ImageView
+android:id="@+id/start_img"
+android:layout_width="fill_parent"
+android:layout_height="wrap_content"
+android:src="@drawable/start_screen2" android:layout_y="0px" android:layout_x="0px" 
+android:paddingBottom="20px" android:scaleType="fitCenter">
+</ImageView>
+<!--  END from Robin res/layout/start.xml -->
+
 <Button android:id="@+id/main_start_button" android:text="Start" android:layout_width="fill_parent" android:layout_height="wrap_content">
 </Button>
 <!-- Now in Debug <TextView  
@@ -65,4 +83,8 @@
     android:id="@+id/main_login_message_text_view"
     />
   -->
+</LinearLayout>
+
+</ScrollView>
+
 </LinearLayout>
