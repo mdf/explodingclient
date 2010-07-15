@@ -24,11 +24,11 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 	
 	public MyMapOverlay(Drawable defaultMarker, ClientState clientState) {
 		super(defaultMarker);
-		boundCenter(defaultMarker);
+		//boundCenter(defaultMarker);
 		clientStateChanged(clientState);
 	}
 	@Override
-	protected MyMapItem createItem(int i) {
+	protected synchronized MyMapItem createItem(int i) {
 		//Log.d(TAG,"CreateItem("+i+"), drawable="+defaultMarker);
 		Member member = (Member)members.get(i);
 		Position pos = member.getPosition();
@@ -36,20 +36,20 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 			Log.e(TAG,"Member "+member.getID()+" has null position");
 			pos = new Position();
 		}
-		MyMapItem item = new MyMapItem(new GeoPoint((int)(pos.getLatitude()*MILLION),(int)(pos.getLongitude()*MILLION)), member.getName(), null);
+		MyMapItem item = new MyMapItem(new GeoPoint((int)(pos.getLatitude()*MILLION),(int)(pos.getLongitude()*MILLION)), member.getName(), null, member);
 		Drawable drawable = MemberDrawableCache.getDrawableMap(member);
-		boundCenter(drawable);
+		//boundCenter(drawable);
 		item.setMarker(drawable);
 		return item;
 	}
 
 	@Override
-	public int size() {
+	public synchronized int size() {
 		if (members==null)
 			return 0;
 		return members.size();
 	}
-	public int indexOf(Member member) {
+	public synchronized int indexOf(Member member) {
 		return members.indexOf(member);
 	}
 	/* (non-Javadoc)
@@ -78,7 +78,18 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 			}
 		}
 		Log.d(TAG,"Members changed: "+size()+" found");
+		setLastFocusedIndex(-1);
+		setFocus(null);
 		populate();		
+	}
+	@Override
+	protected synchronized boolean onTap(int index) {
+		Log.d(TAG,"onTap("+index+") -> focus");
+		setFocus(null);
+		if (index<size())
+			setFocus(getItem(index));
+		return true;
+		//return super.onTap(index);
 	}
 	
 }

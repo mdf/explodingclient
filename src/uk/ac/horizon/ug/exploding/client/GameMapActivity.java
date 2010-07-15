@@ -35,10 +35,13 @@ import uk.ac.horizon.ug.exploding.client.model.Player;
 import uk.ac.horizon.ug.exploding.client.model.Position;
 
 import com.google.android.maps.GeoPoint;
+import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
+import com.google.android.maps.OverlayItem;
+import com.google.android.maps.ItemizedOverlay.OnFocusChangeListener;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -73,7 +76,7 @@ import android.widget.Toast;
  * @author Robin
  *
  */
-public class GameMapActivity extends MapActivity implements ClientStateListener, ClientMessageListener {
+public class GameMapActivity extends MapActivity implements ClientStateListener, ClientMessageListener, OnFocusChangeListener {
 
 	private static final String TAG = "Map";
 	private static final int MILLION = 1000000;
@@ -81,8 +84,9 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	private MyLocationOverlay myLocationOverlay;
 	private MyMapOverlay itemOverlay;
 	private static Member currentMember;
+	private MapView mapView;
 	
-	static enum DialogId { PLACE, PLACE_TO_SERVER };
+	static enum DialogId { PLACE, PLACE_TO_SERVER, CARRY, CARRY_TO_SERVER };
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +97,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			setContentView(R.layout.map);
 			// BEGIN Robin's code - from com.littlebighead.exploding.GameMapView
 	        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-			MapView mapView = (MapView)findViewById(R.id.map_view);
+			mapView = (MapView)findViewById(R.id.map_view);
 	        mapView.setReticleDrawMode(MapView.ReticleDrawMode.DRAW_RETICLE_OVER);
 			Button button = (Button)findViewById(R.id.map_story_button);
 
@@ -101,6 +105,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			button.setOnClickListener(new OnClickListener() {
 			    public void onClick(View v) {
 			    	if (canAuthor()) {
+				    	setCurrentMember(null);
 			    		Intent myIntent = new Intent();
 			    		myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.AddStoryView");
 			    		startActivity(myIntent);
@@ -112,6 +117,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 //			button.setOnClickListener(this);
 			button.setOnClickListener(new OnClickListener() {
 			    public void onClick(View v) {
+			    	setCurrentMember(null);
 					Intent myIntent = new Intent();
 					myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.CommunityView");
 					startActivity(myIntent);
@@ -123,6 +129,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			button.setOnClickListener(new OnClickListener() {
 			    public void onClick(View v) {
 			    	if (canCreateMember()) {
+				    	setCurrentMember(null);
 			    		Intent myIntent = new Intent();
 			    		myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.CreateMemberView");
 			    		startActivityForResult(myIntent,1);
@@ -133,7 +140,6 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			// END Robin's code
 			mapView.setBuiltInZoomControls(true);
 			myLocationOverlay = new MyLocationOverlay(this, mapView);
-			mapView.getOverlays().add(myLocationOverlay);
 			myLocationOverlay.runOnFirstFix(new Runnable() {
 				public void run() {
 					centreOnMyLocation();
@@ -146,7 +152,11 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			ClientState clientState = BackgroundThread.getClientState(this);
 			itemOverlay = new MyMapOverlay(drawable, clientState);
 			BackgroundThread.addClientStateListener(itemOverlay, this, Member.class.getName());
+			itemOverlay.setOnFocusChangeListener(this);
+			
+			mapView.getOverlays().add(myLocationOverlay);
 			mapView.getOverlays().add(itemOverlay);
+
 		}
 		catch (Exception e) {
 			Log.e(TAG, "Error loading map view: "+e);
@@ -192,6 +202,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		List<Member> members = CommunityView.getMyMembers(clientState);//cache.getFacts(Member.class.getName());
 		TextView membersTextView = (TextView)findViewById(R.id.MemberCntTextView);
 		membersTextView.setText(""+members.size());		
+		mapView.invalidate();
 	}
 
 	/**
@@ -385,6 +396,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		//LocationUtils.unregisterOnThread(this, this, null);
 		myLocationOverlay.disableCompass();
 		myLocationOverlay.disableMyLocation();
+		setCurrentMember(null);
 		super.onPause();
 	}
 
@@ -398,6 +410,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		myLocationOverlay.enableMyLocation();
 //		LocationUtils.registerOnThread(this, this, null);
 		itemOverlay.setFocus(null);
+		updateAttributes(currentMember);
 		if (currentMember!=null) {
 			if (currentMember.isSetCarried() && currentMember.getCarried()) {
 				ClientState cs = BackgroundThread.getClientState(this);
@@ -422,9 +435,45 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				}
 				else
 					Log.d(TAG,"Could not find member in overlay: "+currentMember);
+				checkCarry();
 			}
 		}
 	}		
+	/**
+	 * 
+	 */
+	private void checkCarry() {
+		if (canCarry()) {
+			showDialog(DialogId.CARRY.ordinal());
+		}
+	}
+	private boolean canCarry() {
+		// TODO Auto-generated method stub
+		if (currentMember==null)
+			return false;
+		if (currentMember.isSetCarried() && currentMember.getCarried())
+			return false;
+		ClientState cs = BackgroundThread.getClientState(this);
+		if (cs==null)
+			return false;
+		if (LocationUtils.getCurrentLocation(this)==null)
+			return false;
+		Location loc = cs.getLastLocation();
+		if (loc==null)
+			return false;
+		Position pos = currentMember.getPosition();
+		if (pos==null)
+			return false;
+		Location l2 = new Location("gps");
+		l2.setLatitude(pos.getLatitude());
+		l2.setLongitude(pos.getLongitude());
+		l2.setAltitude(pos.getElevation());
+		double dist = loc.distanceTo(l2);
+		if (dist>CARRY_DISTANCE_M)
+			return false;
+		return true;
+	}
+	private static double CARRY_DISTANCE_M = 20;
 //	@Override
 //	public void onLocationChanged(Location location) {
 //		// TODO Auto-generated method stub
@@ -458,10 +507,19 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
       switch(requestCode) { 
         case (1) : { 
           if (resultCode == Activity.RESULT_OK) { 
+        	  
 //        	  ArrayList<Limb> limbs = (ArrayList<Limb>)data.getExtras().get("limbs");
-        	  for (Limb limb: Body.limbs) {
-        		  Log.i("limb position", Double.toString(limb.x));
-        	  }
+//        	  for (Limb limb: Body.limbs) {
+//        		  Log.i("limb position", Double.toString(limb.x));
+//       	  }
+        	  // can't place immediately for now so push to community with a message
+        	  Toast.makeText(this, "Your new community member will appear in a moment", Toast.LENGTH_LONG).show();
+
+        	  setCurrentMember(null);
+        	  Intent myIntent = new Intent();
+        	  myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.CommunityView");
+        	  startActivity(myIntent);
+        	  
           } 
           break; 
         } 
@@ -527,9 +585,93 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			});
 			return creatingPd;
 		}
+		if (id==DialogId.CARRY.ordinal()) {
+			final Dialog dialog = new Dialog(this);
+			dialog.setContentView(R.layout.carry_member_dialog);
+			dialog.setCancelable(true);
+			dialog.setTitle("Closest Member");
+			dialog.setOnCancelListener(new OnCancelListener()  {				
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					dismissDialog(DialogId.CARRY.ordinal());
+				}
+			});
+			Button ok = (Button)dialog.findViewById(R.id.carry_member_dialog_ok_button);
+			ok.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					dismissDialog(DialogId.CARRY.ordinal());
+					//playerDialogActive = false;
+					// TODO
+					carryCurrentMember();
+				}
+			});
+			Button cancel = (Button)dialog.findViewById(R.id.carry_member_dialog_cancel_button);
+			cancel.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+					dialog.cancel();
+				}
+				
+			});
+			return dialog;
+			
+		}
+		if (id==DialogId.CARRY_TO_SERVER.ordinal()) {
+			ProgressDialog creatingPd = new ProgressDialog(this);
+			creatingPd.setCancelable(true);
+			creatingPd.setMessage("Moving member...");
+			creatingPd.setOnCancelListener(new OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					if (cache!=null && placeMemberMessage!=null) 
+						cache.cancelMessage(placeMemberMessage, true);
+					cache = null;
+					placeMemberMessage = null;
+					placedMember = null;
+				}
+			});
+			return creatingPd;
+		}
 		return super.onCreateDialog(id);
 	}
 	
+	/**
+	 * 
+	 */
+	protected void carryCurrentMember() {
+		if (currentMember!=null) {
+			Member m = new Member();
+			m.setID(currentMember.getID());
+			m.setCarried(true);
+			m.setPosition(currentMember.getPosition());
+			m.setZone(currentMember.getZone());
+			placedMember = m;
+			
+			ClientState cs = BackgroundThread.getClientState(this);
+			if (cs==null) {
+				Log.e(TAG,"carryCurrentMember: ClientState null");
+				return;
+			}
+			cache = cs.getCache();
+			if (cache==null) {
+				Log.e(TAG,"carryCurrentMember: ClientState null");
+				return;
+			}				
+			try {
+				// Note: this is (now) an async action
+				placeMemberMessage = cache.queueMessage(cache.updateFactMessage(currentMember, m), this);
+				Log.i(TAG,"Carry member: "+m);
+
+				showDialog(DialogId.CARRY_TO_SERVER.ordinal());
+			}
+			catch (Exception e) {
+				Toast.makeText(this, "Sorry: "+e, Toast.LENGTH_LONG).show();
+				Log.e(TAG, "Carrying member", e);
+			}
+
+		}
+	}
 	private Client cache;
 	private QueuedMessage placeMemberMessage;
 	private Member placedMember;
@@ -578,7 +720,10 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	public void onMessageResponse(MessageStatusType status,
 			String errorMessage, Object value) {
 		Log.d(TAG,"onMessageResponse: status="+status+", error="+errorMessage+", value="+value);
-		dismissDialog(DialogId.PLACE_TO_SERVER.ordinal());
+		if (currentMember!=null && currentMember.getCarried())
+			dismissDialog(DialogId.PLACE_TO_SERVER.ordinal());
+		else
+			dismissDialog(DialogId.CARRY_TO_SERVER.ordinal());
 
 		if (status==MessageStatusType.OK) {
 			// fiddle with cache?
@@ -589,6 +734,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				currentMember.setZone(placedMember.getZone());
 				itemOverlay.clientStateChanged(cs);
 			}
+			//Toast.makeText(this, "Done: the map will update in a moment", Toast.LENGTH_LONG).show();
 		}
 		else
 			Toast.makeText(this, "Sorry: "+errorMessage, Toast.LENGTH_LONG).show();
@@ -596,5 +742,37 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		placeMemberMessage = null;
 		placedMember = null;
 		cache = null;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.google.android.maps.ItemizedOverlay.OnFocusChangeListener#onFocusChanged(com.google.android.maps.ItemizedOverlay, com.google.android.maps.OverlayItem)
+	 */
+	@Override
+	public void onFocusChanged(ItemizedOverlay overlay, OverlayItem newFocus) {
+		// TODO Auto-generated method stub
+		if (newFocus instanceof MyMapItem) {
+			MyMapItem mmi = (MyMapItem)newFocus;
+			Log.d(TAG,"Focus changed to "+mmi.getMember().getID());
+			currentMember = mmi.getMember();
+			updateAttributes(mmi.getMember());
+			checkCarry();
+		}
+		else
+			updateAttributes(null);
+	}
+
+	/**
+	 * @param member
+	 */
+	private void updateAttributes(Member member) {
+		TextView tv;
+		tv = (TextView)findViewById(R.id.ActionTextView);
+		tv.setText(member==null ? "-" : ""+member.getAction());
+		tv = (TextView)findViewById(R.id.BrainsTextView);
+		tv.setText(member==null ? "-" : ""+member.getBrains());
+		tv = (TextView)findViewById(R.id.HealthTextView);
+		tv.setText(member==null ? "-" : ""+member.getHealth());
+		tv = (TextView)findViewById(R.id.WealthTextView);
+		tv.setText(member==null ? "-" : ""+member.getWealth());
 	}
 }

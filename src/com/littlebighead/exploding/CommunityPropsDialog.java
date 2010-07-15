@@ -92,6 +92,7 @@ public class CommunityPropsDialog extends Dialog {
             CommunityPropsDialog.this.dismiss();
             Intent intent = new Intent();
             intent.setClass(CommunityPropsDialog.this.getContext(), GameMapActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             CommunityPropsDialog.this.getContext().startActivity(intent);
         }
     }

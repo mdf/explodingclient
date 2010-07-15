@@ -95,16 +95,18 @@ public class MemberDrawableCache {
 		canvas.scale(1.0f*WIDTH/500, 1.0f*HEIGHT/500);
 		body.draw(canvas, false);
 		Drawable d = new BitmapDrawable(di.bitmap);
+		d.setBounds(0, 0, WIDTH, HEIGHT);
 		StateListDrawable sld = new StateListDrawable() {
 			@Override
 			public boolean setState(int[] stateSet) {
 				// debug...
-				Log.d(TAG,"setState: "+Arrays.toString(stateSet));
+				//Log.d(TAG,"setState: "+Arrays.toString(stateSet));
 				return super.setState(stateSet);
 			}
 			
 		};
 		di.drawable = d;
+		sld.setBounds(-WIDTH/2, -HEIGHT/2, WIDTH/2, HEIGHT/2);
 		di.drawableMap = sld;
 		Bitmap bitmapSelected = Bitmap.createBitmap(di.bitmap);
 		canvas = new Canvas(bitmapSelected);
@@ -123,6 +125,7 @@ public class MemberDrawableCache {
 		tp.setTextSize(WIDTH/4);
 		canvas.drawText("UNPLACED", 0, HEIGHT/2, tp);
 		di.drawableCarried = new BitmapDrawable(bitmapCarried);
+		di.drawableCarried.setBounds(0, 0, WIDTH, HEIGHT);
 		return di;
 	}
 

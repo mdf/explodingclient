@@ -8,6 +8,7 @@ import uk.ac.horizon.ug.exploding.client.Client;
 import uk.ac.horizon.ug.exploding.client.ClientMessageListener;
 import uk.ac.horizon.ug.exploding.client.ClientState;
 import uk.ac.horizon.ug.exploding.client.ExplodingPreferences;
+import uk.ac.horizon.ug.exploding.client.GameMapActivity;
 import uk.ac.horizon.ug.exploding.client.MessageStatusType;
 import uk.ac.horizon.ug.exploding.client.R;
 import uk.ac.horizon.ug.exploding.client.Client.QueuedMessage;
@@ -122,6 +123,9 @@ public class CreateMemberView extends Activity implements ClientMessageListener 
 			// Note: this is (now) an async action
 			createMemberMessage = cache.queueMessage(cache.addFactMessage(member), this);
 			Log.i(TAG,"Creating member: "+member);
+
+			// Can't do this because we have no ID (ready to place...)
+			//GameMapActivity.setCurrentMember(member);
 			
 			showDialog(DialogId.CREATING_MEMBER.ordinal());
 		} 
@@ -142,8 +146,10 @@ public class CreateMemberView extends Activity implements ClientMessageListener 
 	    	setResult(Activity.RESULT_OK, resultIntent);            		    	
 			this.finish();
 		}
-		else
+		else {
 			Toast.makeText(this, "Sorry: "+errorMessage, Toast.LENGTH_LONG).show();
+			GameMapActivity.setCurrentMember(null);
+		}
 		// tidy up
 		createMemberMessage = null;
 		cache = null;
