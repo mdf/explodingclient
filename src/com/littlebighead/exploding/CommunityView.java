@@ -9,6 +9,7 @@ import uk.ac.horizon.ug.exploding.client.BackgroundThread;
 import uk.ac.horizon.ug.exploding.client.Client;
 import uk.ac.horizon.ug.exploding.client.ClientState;
 import uk.ac.horizon.ug.exploding.client.ClientStateListener;
+import uk.ac.horizon.ug.exploding.client.GameMapActivity;
 import uk.ac.horizon.ug.exploding.client.R;
 import uk.ac.horizon.ug.exploding.client.model.Member;
 import uk.ac.horizon.ug.exploding.client.model.Player;
@@ -45,6 +46,7 @@ public class CommunityView extends Activity implements ClientStateListener {	//i
 	// BEGIN cmg
 	private List<Member> members = new LinkedList<Member>();
 	private GridView gridview;
+	private ImageAdapter imageAdapter;
 	// END cmg
 	
     /** Called when the activity is first created. */
@@ -59,12 +61,14 @@ public class CommunityView extends Activity implements ClientStateListener {	//i
     	setContentView(R.layout.community);  
     	
         gridview = (GridView) findViewById(R.id.gridview);
-        gridview.setAdapter(new ImageAdapter(this));
+        imageAdapter = new ImageAdapter(this);
+        gridview.setAdapter(imageAdapter);
 
         // CMG
         BackgroundThread.addClientStateListener(this, this, Member.class.getName());
         ClientState clientState = BackgroundThread.getClientState(this);
         clientStateChanged(clientState);
+        GameMapActivity.setCurrentMember(null);
         // END CMG
 
         /*
@@ -206,7 +210,9 @@ public class CommunityView extends Activity implements ClientStateListener {	//i
             	imageView = (ImageView) convertView;
             }
 
-            imageView.setImageResource(mThumbIds[0]);
+            Member member = members.get(position);
+            imageView.setImageDrawable(member.isSetCarried() && member.getCarried() ? MemberDrawableCache.getDrawableCarried(member) : MemberDrawableCache.getDrawable(member));
+            //imageView.setImageResource(mThumbIds[0]);
             return imageView;
         }
         
@@ -215,11 +221,6 @@ public class CommunityView extends Activity implements ClientStateListener {	//i
         	
         }
 
-        // references to our images
-        private Integer[] mThumbIds = {
-                R.drawable.icon
-//R.drawable.image001,
-        };
     }
 
     // CMG
@@ -251,7 +252,8 @@ public class CommunityView extends Activity implements ClientStateListener {	//i
 		members = getMyMembers(clientState);
 		Log.d(TAG,"Found "+members.size()+" members");
 		
-		gridview.invalidate();
+		imageAdapter.notifyDataSetChanged();
+		//gridview.invalidate();
 	}
 	// END CMG
 }

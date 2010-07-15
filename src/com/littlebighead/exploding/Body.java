@@ -10,6 +10,7 @@ import android.graphics.PointF;
 import android.graphics.Paint.Style;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.util.Log;
 
 public class Body {
 	final private static double piDiv180 = Math.PI / 180.0;
@@ -42,7 +43,7 @@ public class Body {
 			l.draw(canvas);
 		}
         ShapeDrawable mDrawable = new ShapeDrawable(new OvalShape());
-        mDrawable.getPaint().setColor(color/*0x7fff0000*/);
+        mDrawable.getPaint().setColor(0x7fff0000);
         mDrawable.getPaint().setStyle(Style.STROKE);
         mDrawable.setBounds(-5, -5,5, 5);
         mDrawable.draw(canvas);
@@ -50,11 +51,15 @@ public class Body {
 	}
 		
 	public void draw(Canvas canvas) {
+		draw(canvas, true);
+	}
+	public void draw(Canvas canvas, boolean clear) {
 		this.canvas = canvas;
-		canvas.drawColor(0xffffffff);
+		if (clear)
+			canvas.drawColor(0xffffffff);
 
 		//drawCurves(false);
-		drawBaseCurves(0x0000ff, 255);
+		drawBaseCurves(color, 255);
 		drawCurves(true);
 		limbs[0].drawEyes(canvas);
 	}
@@ -117,7 +122,7 @@ public class Body {
 	        ShapeDrawable mDrawable = new ShapeDrawable(new OvalShape());
 	        Paint paint = mDrawable.getPaint();
 			//if (fill) {
-				paint.setColor(0xff0000ff);
+				paint.setColor(color); //0xff0000ff);
 				paint.setStyle(Paint.Style.FILL);
 			//} else {
 		        //paint.setStrokeWidth(8);
@@ -141,8 +146,11 @@ public class Body {
         return newPnt;    
     }
 
+    // BEGIN CMG
     /** total points to share out */
     static final int TOTAL_POINTS = 24;
+
+	private static final String TAG = "Body";
 	/** Attributes based on relative distance from centre
 	 * @author cmg
 	 * @return
@@ -183,4 +191,24 @@ public class Body {
 		}
 		return sb.toString();
 	}
+
+	/**
+	 * @param limbInfo
+	 */
+	public void setLimbInfo(String limbInfo) {
+		String vals[] = limbInfo.split("[,]");
+		for (int i=0; i<limbs.length && i*4+3<vals.length; i++) {
+			try {
+				Limb limb = limbs[i];
+				limb.x = Float.parseFloat(vals[i*4]);
+				limb.y = Float.parseFloat(vals[i*4+1]);
+				limb.xradius = Float.parseFloat(vals[i*4+2]);
+				limb.yradius = Float.parseFloat(vals[i*4+3]);
+			}
+			catch (NumberFormatException nfe) {
+				Log.d(TAG, "Error in limbInfo", nfe);
+			}
+		}
+	}
+	// END CMG
 }

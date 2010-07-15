@@ -27,10 +27,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import uk.ac.horizon.ug.exploding.client.Client.QueuedMessage;
 import uk.ac.horizon.ug.exploding.client.model.Game;
 import uk.ac.horizon.ug.exploding.client.model.Member;
 import uk.ac.horizon.ug.exploding.client.model.Message;
 import uk.ac.horizon.ug.exploding.client.model.Player;
+import uk.ac.horizon.ug.exploding.client.model.Position;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -39,8 +41,12 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -58,6 +64,7 @@ import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.animation.BounceInterpolator;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,13 +73,16 @@ import android.widget.Toast;
  * @author Robin
  *
  */
-public class GameMapActivity extends MapActivity implements ClientStateListener {
+public class GameMapActivity extends MapActivity implements ClientStateListener, ClientMessageListener {
 
 	private static final String TAG = "Map";
 	private static final int MILLION = 1000000;
 	private static final int MIN_ZOOM_LEVEL = 19;// Robin Default
 	private MyLocationOverlay myLocationOverlay;
 	private MyMapOverlay itemOverlay;
+	private static Member currentMember;
+	
+	static enum DialogId { PLACE, PLACE_TO_SERVER };
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -336,14 +346,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener 
 		try {
 			Location loc = LocationUtils.getCurrentLocation(this);
 			if (loc!=null) {
-				MapView mapView = (MapView)findViewById(R.id.map_view);
-				MapController controller = mapView.getController();
-				int zoomLevel = mapView.getZoomLevel();
-				// zoom Level 15 is about 1000m on a side
-				if (zoomLevel < MIN_ZOOM_LEVEL)
-					controller.setZoom(MIN_ZOOM_LEVEL);
-				GeoPoint point = new GeoPoint((int)(loc.getLatitude()*MILLION), (int)(loc.getLongitude()*MILLION));
-				controller.animateTo(point);
+				centreOn(loc.getLatitude(), loc.getLongitude());
 			}
 			else
 			{
@@ -352,6 +355,22 @@ public class GameMapActivity extends MapActivity implements ClientStateListener 
 		}catch (Exception e) {
 			Log.e(TAG, "doing centreOnMyLocation", e);
 		}
+	}
+
+	/**
+	 * @param latitude
+	 * @param longitude
+	 */
+	private void centreOn(double latitude, double longitude) {
+		// TODO Auto-generated method stub
+		MapView mapView = (MapView)findViewById(R.id.map_view);
+		MapController controller = mapView.getController();
+		int zoomLevel = mapView.getZoomLevel();
+		// zoom Level 15 is about 1000m on a side
+		if (zoomLevel < MIN_ZOOM_LEVEL)
+			controller.setZoom(MIN_ZOOM_LEVEL);
+		GeoPoint point = new GeoPoint((int)(latitude*MILLION), (int)(longitude*MILLION));
+		controller.animateTo(point);		
 	}
 
 	@Override
@@ -369,6 +388,8 @@ public class GameMapActivity extends MapActivity implements ClientStateListener 
 		super.onPause();
 	}
 
+	private Location placeLocation;
+	private int placeZone;
 	@Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
@@ -376,7 +397,33 @@ public class GameMapActivity extends MapActivity implements ClientStateListener 
 		myLocationOverlay.enableCompass();
 		myLocationOverlay.enableMyLocation();
 //		LocationUtils.registerOnThread(this, this, null);
-//		centreOnMyLocation();
+		itemOverlay.setFocus(null);
+		if (currentMember!=null) {
+			if (currentMember.isSetCarried() && currentMember.getCarried()) {
+				ClientState cs = BackgroundThread.getClientState(this);
+				placeLocation = LocationUtils.getCurrentLocation(this);
+				placeZone = cs.getZoneOrgID();
+				centreOnMyLocation();
+				// drop...
+				if (placeLocation!=null) {
+					showDialog(DialogId.PLACE.ordinal());
+				}
+			} 
+			else {
+				if (currentMember.isSetPosition()) {
+					Position p = currentMember.getPosition();
+					if (p.isSetLatitude() && p.isSetLongitude())
+						centreOn(p.getLatitude(), p.getLongitude());
+				}				
+				int pos = itemOverlay.indexOf(currentMember);
+				if (pos>=0) {
+					itemOverlay.setFocus(itemOverlay.getItem(pos));
+					Log.d(TAG,"Set focus to item "+pos);
+				}
+				else
+					Log.d(TAG,"Could not find member in overlay: "+currentMember);
+			}
+		}
 	}		
 //	@Override
 //	public void onLocationChanged(Location location) {
@@ -421,4 +468,133 @@ public class GameMapActivity extends MapActivity implements ClientStateListener 
       } 
     }
     // END ROBIN
+
+	public static Member getCurrentMember() {
+		return currentMember;
+	}
+
+	public static void setCurrentMember(Member currentMember) {
+		GameMapActivity.currentMember = currentMember;
+	}
+    
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		if (id==DialogId.PLACE.ordinal()) {
+			final Dialog dialog = new Dialog(this);
+			dialog.setContentView(R.layout.place_member_dialog);
+			dialog.setCancelable(true);
+			dialog.setTitle("Place Here?");
+			dialog.setOnCancelListener(new OnCancelListener()  {				
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					dismissDialog(DialogId.PLACE.ordinal());
+				}
+			});
+			Button ok = (Button)dialog.findViewById(R.id.place_member_dialog_ok_button);
+			ok.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					dismissDialog(DialogId.PLACE.ordinal());
+					//playerDialogActive = false;
+					// TODO
+					placeCurrentMember();
+				}
+			});
+			Button cancel = (Button)dialog.findViewById(R.id.place_member_dialog_cancel_button);
+			cancel.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+					dialog.cancel();
+				}
+				
+			});
+			return dialog;
+			
+		}
+		if (id==DialogId.PLACE_TO_SERVER.ordinal()) {
+			ProgressDialog creatingPd = new ProgressDialog(this);
+			creatingPd.setCancelable(true);
+			creatingPd.setMessage("Placing member...");
+			creatingPd.setOnCancelListener(new OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					if (cache!=null && placeMemberMessage!=null) 
+						cache.cancelMessage(placeMemberMessage, true);
+					cache = null;
+					placeMemberMessage = null;
+					placedMember = null;
+				}
+			});
+			return creatingPd;
+		}
+		return super.onCreateDialog(id);
+	}
+	
+	private Client cache;
+	private QueuedMessage placeMemberMessage;
+	private Member placedMember;
+	/**
+	 * 
+	 */
+	protected void placeCurrentMember() {
+		// TODO Auto-generated method stub
+		if (currentMember!=null) {
+			Member m = new Member();
+			m.setID(currentMember.getID());
+			m.setCarried(false);
+			Position pos = new Position();
+			pos.setLatitude(placeLocation.getLatitude());
+			pos.setLongitude(placeLocation.getLongitude());
+			pos.setElevation(placeLocation.getAltitude());
+			m.setPosition(pos);
+			m.setZone(placeZone);
+			placedMember = m;
+			
+			ClientState cs = BackgroundThread.getClientState(this);
+			if (cs==null) {
+				Log.e(TAG,"placeCurrentMember: ClientState null");
+				return;
+			}
+			cache = cs.getCache();
+			if (cache==null) {
+				Log.e(TAG,"placeCurrentMember: ClientState null");
+				return;
+			}				
+			try {
+				// Note: this is (now) an async action
+				placeMemberMessage = cache.queueMessage(cache.updateFactMessage(currentMember, m), this);
+				Log.i(TAG,"Place member: "+m);
+
+				showDialog(DialogId.PLACE_TO_SERVER.ordinal());
+			}
+			catch (Exception e) {
+				Toast.makeText(this, "Sorry: "+e, Toast.LENGTH_LONG).show();
+				Log.e(TAG, "Placing member", e);
+			}
+
+		}
+	}
+	@Override
+	public void onMessageResponse(MessageStatusType status,
+			String errorMessage, Object value) {
+		Log.d(TAG,"onMessageResponse: status="+status+", error="+errorMessage+", value="+value);
+		dismissDialog(DialogId.PLACE_TO_SERVER.ordinal());
+
+		if (status==MessageStatusType.OK) {
+			// fiddle with cache?
+			ClientState cs = BackgroundThread.getClientState(this);
+			if (currentMember!=null && placedMember!=null && cs!=null) {
+				currentMember.setCarried(placedMember.getCarried());
+				currentMember.setPosition(placedMember.getPosition());
+				currentMember.setZone(placedMember.getZone());
+				itemOverlay.clientStateChanged(cs);
+			}
+		}
+		else
+			Toast.makeText(this, "Sorry: "+errorMessage, Toast.LENGTH_LONG).show();
+		// tidy up
+		placeMemberMessage = null;
+		placedMember = null;
+		cache = null;
+	}
 }

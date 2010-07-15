@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+
+<TextView android:text="Click PLACE to place in this location or CANCEL if you want to store in inventory" android:layout_width="wrap_content" android:layout_height="wrap_content"/>  
+
+<LinearLayout
+  android:orientation="horizontal"
+  android:layout_width="fill_parent"
+  android:layout_height="wrap_content">
+
+<Button android:text="PLACE" android:id="@+id/place_member_dialog_ok_button" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+<Button android:text="CANCEL" android:id="@+id/place_member_dialog_cancel_button" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+</LinearLayout>
+  
+</LinearLayout>

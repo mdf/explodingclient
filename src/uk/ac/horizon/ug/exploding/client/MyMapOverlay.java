@@ -13,12 +13,13 @@ import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
+import com.littlebighead.exploding.MemberDrawableCache;
 
 /** just a test for now */
 public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientStateListener {
 	private static final String TAG = "MyMapOverlay";
 	private static final int MILLION = 1000000;
-	private Drawable defaultMarker;
+	//private Drawable defaultMarker;
 	private List<Object> members;
 	
 	public MyMapOverlay(Drawable defaultMarker, ClientState clientState) {
@@ -28,16 +29,17 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 	}
 	@Override
 	protected MyMapItem createItem(int i) {
-		Log.d(TAG,"CreateItem("+i+"), drawable="+defaultMarker);
+		//Log.d(TAG,"CreateItem("+i+"), drawable="+defaultMarker);
 		Member member = (Member)members.get(i);
 		Position pos = member.getPosition();
 		if (pos==null) {
 			Log.e(TAG,"Member "+member.getID()+" has null position");
 			pos = new Position();
 		}
-		// TODO sensible name?
-		MyMapItem item = new MyMapItem(new GeoPoint((int)(pos.getLatitude()*MILLION),(int)(pos.getLongitude()*MILLION)), member.getPlayerID(), null);
-		//item.setMarker(defaultMarker);
+		MyMapItem item = new MyMapItem(new GeoPoint((int)(pos.getLatitude()*MILLION),(int)(pos.getLongitude()*MILLION)), member.getName(), null);
+		Drawable drawable = MemberDrawableCache.getDrawableMap(member);
+		boundCenter(drawable);
+		item.setMarker(drawable);
 		return item;
 	}
 
@@ -46,6 +48,9 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 		if (members==null)
 			return 0;
 		return members.size();
+	}
+	public int indexOf(Member member) {
+		return members.indexOf(member);
 	}
 	/* (non-Javadoc)
 	 * @see uk.ac.horizon.ug.exploding.client.ClientStateListener#clientStateChanged(uk.ac.horizon.ug.exploding.client.ClientState)

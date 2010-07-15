@@ -36,7 +36,7 @@
 	</LinearLayout>
 	<AbsoluteLayout android:layout_height="wrap_content" android:layout_width="fill_parent">
 	
-	<com.google.android.maps.MapView android:id="@+id/map_view" android:layout_width="fill_parent" android:clickable="true" android:apiKey="0DCXfmwsB5lNl4mg3T70vftbT6J5ZLaQFBXB15g" android:layout_height="700px" />
+	<com.google.android.maps.MapView android:id="@+id/map_view" android:layout_width="fill_parent" android:clickable="true" android:apiKey="03n3fWJh9uBTZBBsJ6AfpbuPbFE8rdl745MCy4w" android:layout_height="700px" />
   <!--  kubrick debug 03n3fWJh9uBSVBCM65cdV1TZ-n4c0ZXdG1KG27A -->
   <!--  cmg           03n3fWJh9uBTZBBsJ6AfpbuPbFE8rdl745MCy4w -->
   <!--  ROBIN         0DCXfmwsB5lNl4mg3T70vftbT6J5ZLaQFBXB15g -->	

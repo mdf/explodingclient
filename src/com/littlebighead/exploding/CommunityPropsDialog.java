@@ -1,9 +1,11 @@
 package com.littlebighead.exploding;
 
+import uk.ac.horizon.ug.exploding.client.GameMapActivity;
 import uk.ac.horizon.ug.exploding.client.R;
 import uk.ac.horizon.ug.exploding.client.model.Member;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,7 +88,11 @@ public class CommunityPropsDialog extends Dialog {
         @Override
         public void onClick(View v) {
             readyListener.ready(String.valueOf(etName.getText()));
+            GameMapActivity.setCurrentMember(member);
             CommunityPropsDialog.this.dismiss();
+            Intent intent = new Intent();
+            intent.setClass(CommunityPropsDialog.this.getContext(), GameMapActivity.class);
+            CommunityPropsDialog.this.getContext().startActivity(intent);
         }
     }
 
