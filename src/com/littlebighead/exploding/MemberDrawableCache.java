@@ -116,7 +116,7 @@ public class MemberDrawableCache {
 		sp.setStrokeWidth(3);
 		canvas.drawOval(new RectF(1f,1f,WIDTH-2,HEIGHT-2), sp);
 		sld.addState(selected, new BitmapDrawable(bitmapSelected));
-		sld.addState(unselected, d);
+		sld.addState(unselected, new BitmapDrawable(di.bitmap));
 		
 		Bitmap bitmapCarried = Bitmap.createBitmap(di.bitmap);		
 		canvas = new Canvas(bitmapCarried);
