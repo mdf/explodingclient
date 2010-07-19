@@ -20,7 +20,8 @@ public class Body {
 	private Canvas canvas;
 	public static Bitmap bitmap;
 	private int color;
-	
+	private float margin = 0;
+
 	public Body(int color) {
 		this.color = color;
 		limbs = new Limb[limbCnt];
@@ -44,7 +45,8 @@ public class Body {
 		}
         ShapeDrawable mDrawable = new ShapeDrawable(new OvalShape());
         mDrawable.getPaint().setColor(0x7fff0000);
-        mDrawable.getPaint().setStyle(Style.STROKE);
+        mDrawable.getPaint().
+        setStyle(Style.STROKE);
         mDrawable.setBounds(-5, -5,5, 5);
         mDrawable.draw(canvas);
 		
@@ -57,11 +59,18 @@ public class Body {
 		this.canvas = canvas;
 		if (clear)
 			canvas.drawColor(0xffffffff);
-
+		margin = 0;
 		//drawCurves(false);
 		drawBaseCurves(color, 255);
-		drawCurves(true);
+		drawCurves(color, true);
 		limbs[0].drawEyes(canvas);
+	}
+	public void drawShadow(Canvas canvas, float margin) {
+		this.canvas = canvas;
+		this.margin = margin;
+		//drawCurves(false);
+		drawBaseCurves(0xff000000, 255);
+		drawCurves(0xff000000, true);
 	}
 		
 	public void drawBaseCurves(int col, int alp) {
@@ -89,25 +98,30 @@ public class Body {
 		
 	}
 	
-	public void drawCurves(boolean fill) {
+	public void drawCurves(int color, boolean fill) {
 		Limb prevLimb = null;
 		for (int f = 0; f < limbCnt; f++) {
 			if (prevLimb != null) {
 				double cx = (prevLimb.x+limbs[f].x) * 0.3333d;
 				double cy = (prevLimb.y+limbs[f].y) * 0.3333d;
-				myCurveTo(prevLimb.x, prevLimb.y, prevLimb.xradius, prevLimb.yradius, limbs[f].x, limbs[f].y, limbs[f].xradius, limbs[f].yradius, fill, cx,cy);
+				myCurveTo(prevLimb.x, prevLimb.y, prevLimb.xradius, prevLimb.yradius, limbs[f].x, limbs[f].y, limbs[f].xradius, limbs[f].yradius, fill, cx,cy, color);
 			}
 			prevLimb = limbs[f];
 		}
 		double cx = (prevLimb.x+limbs[0].x) * 0.3333d;
 		double cy = (prevLimb.y+limbs[0].y) * 0.3333d;
-		myCurveTo(prevLimb.x, prevLimb.y, prevLimb.xradius, prevLimb.yradius, limbs[0].x, limbs[0].y, limbs[0].xradius, limbs[0].yradius, fill, cx,cy);
+		myCurveTo(prevLimb.x, prevLimb.y, prevLimb.xradius, prevLimb.yradius, limbs[0].x, limbs[0].y, limbs[0].xradius, limbs[0].yradius, fill, cx,cy, color);
 	}
 	
 
 	
 //	private void myCurveTo(float x0, float y0, rad0:Number, x1:Number, y1:Number, rad1:Number, fill:Boolean = false, cx:Number=0, cy:Number=0) {
-	private void myCurveTo(double x0, double y0, double xrad0, double yrad0, double x1, double y1, double xrad1, double yrad1, boolean fill, double cx, double cy) {
+	private void myCurveTo(double x0, double y0, double xrad0, double yrad0, double x1, double y1, double xrad1, double yrad1, boolean fill, double cx, double cy, int color2) {
+		/*xrad0 += margin;
+		yrad0 += margin;
+		xrad1 += margin;
+		yrad1 += margin;
+		*/
 		PointF p0 = new PointF((float)x0, (float)y0);
 		PointF p1 = new PointF((float)x1, (float)y1);
 		PointF c = new PointF((float)cx, (float)cy);
@@ -122,7 +136,7 @@ public class Body {
 	        ShapeDrawable mDrawable = new ShapeDrawable(new OvalShape());
 	        Paint paint = mDrawable.getPaint();
 			//if (fill) {
-				paint.setColor(color); //0xff0000ff);
+				paint.setColor(color2); //0xff0000ff);
 				paint.setStyle(Paint.Style.FILL);
 			//} else {
 		        //paint.setStrokeWidth(8);
@@ -147,6 +161,31 @@ public class Body {
     }
 
     // BEGIN CMG
+    /** get min y */
+    public float getMinY() {
+    	float minY = 0;
+    	for (int i=0; i<limbs.length; i++) {
+    		if (limbs[i].y-limbs[i].yradius < minY)
+    			minY = (float)(limbs[i].y-limbs[i].yradius);
+    	}
+    	return minY;
+    }
+    /** get half-length */
+    public float getRadius() {
+    	float radius = 0;
+    	for (int i=0; i<limbs.length; i++) {
+    		if (limbs[i].y+limbs[i].yradius > radius)
+    			radius = (float)(limbs[i].y+limbs[i].yradius);
+    		if (-limbs[i].y+limbs[i].yradius > radius)
+    			radius = (float)(-limbs[i].y+limbs[i].yradius);
+    		if (limbs[i].x+limbs[i].xradius > radius)
+    			radius = (float)(limbs[i].x+limbs[i].xradius);
+    		if (-limbs[i].x+limbs[i].xradius > radius)
+    			radius = (float)(-limbs[i].x+limbs[i].xradius);
+    	}
+    	return radius;
+
+    }
     /** total points to share out */
     static final int TOTAL_POINTS = 24;
 

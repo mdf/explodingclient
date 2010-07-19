@@ -39,7 +39,7 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 		MyMapItem item = new MyMapItem(new GeoPoint((int)(pos.getLatitude()*MILLION),(int)(pos.getLongitude()*MILLION)), member.getName(), null, member);
 		Drawable drawable = MemberDrawableCache.getDrawableMap(member);
 		//boundCenter(drawable);
-		boundCenterBottom(drawable);
+		//boundCenterBottom(drawable);
 		item.setMarker(drawable);
 		return item;
 	}

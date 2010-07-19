@@ -84,18 +84,47 @@ public class MemberDrawableCache {
 	 */
 	private static DrawableInfo createDrawableInfo(MemberInfo mi) {
 		DrawableInfo di = new DrawableInfo();
-		// TODO Auto-generated method stub
-		di.bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888);
-		Canvas canvas = new Canvas(di.bitmap);
-		canvas.drawARGB(0, 0, 0, 0);
 
 		Body body = new Body(mi.color);
 		body.setLimbInfo(mi.limbInfo);
-		canvas.translate(WIDTH/2, HEIGHT/2);
-		canvas.scale(1.0f*WIDTH/500, 1.0f*HEIGHT/500);
+		float minY = body.getMinY();
+		float radius = body.getRadius();
+
+		// community
+		Bitmap bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888);
+		Canvas canvas = new Canvas(bitmap);
+		//canvas.drawARGB(0, 0, 0, 0);
+		canvas.drawARGB(0xff, 0xff, 0xff, 0xff);
+		canvas.translate(WIDTH/2, 5+HEIGHT/2*(-minY)/radius);
+		canvas.scale(1.0f*(WIDTH-10)/(2*radius), 1.0f*(HEIGHT-10)/(2*radius));
 		body.draw(canvas, false);
-		Drawable d = new BitmapDrawable(di.bitmap);
+		Drawable d = new BitmapDrawable(bitmap);
 		d.setBounds(0, 0, WIDTH, HEIGHT);
+		di.drawable = d;
+
+		// community carried
+		Bitmap bitmapCarried = Bitmap.createBitmap(bitmap);		
+		canvas = new Canvas(bitmapCarried);
+		Paint tp = new Paint();
+		tp.setColor(0xff000000);
+		tp.setTextSize(WIDTH/5);
+		tp.setFakeBoldText(true);
+		canvas.drawText("PLACE ME", 3, 3*HEIGHT/4, tp);
+		di.drawableCarried = new BitmapDrawable(bitmapCarried);
+		di.drawableCarried.setBounds(0, 0, WIDTH, HEIGHT);
+
+		// map
+		di.bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888);
+		canvas = new Canvas(di.bitmap);
+		canvas.drawARGB(0, 0, 0, 0);
+		//canvas.drawARGB(0xff, 0xff, 0xff, 0xff);
+		canvas.translate(WIDTH/2, 5+HEIGHT/2*(-minY)/radius);
+//		canvas.scale(1.0f*(WIDTH-10)/(2*radius), 1.0f*(HEIGHT-10)/(2*radius));
+		canvas.scale(1.0f*WIDTH/(2*radius), 1.0f*HEIGHT/(2*radius));
+		body.drawShadow(canvas, 0);//5*2*radius/(HEIGHT-10));
+		canvas.scale(1.0f*(WIDTH-10)/(WIDTH), 1.0f*(HEIGHT-10)/HEIGHT);
+		body.draw(canvas, false);
+
 		StateListDrawable sld = new StateListDrawable() {
 			@Override
 			public boolean setState(int[] stateSet) {
@@ -105,7 +134,6 @@ public class MemberDrawableCache {
 			}
 			
 		};
-		di.drawable = d;
 		sld.setBounds(-WIDTH/2, -HEIGHT/2, WIDTH/2, HEIGHT/2);
 		di.drawableMap = sld;
 		Bitmap bitmapSelected = Bitmap.createBitmap(di.bitmap);
@@ -118,14 +146,6 @@ public class MemberDrawableCache {
 		sld.addState(selected, new BitmapDrawable(bitmapSelected));
 		sld.addState(unselected, new BitmapDrawable(di.bitmap));
 		
-		Bitmap bitmapCarried = Bitmap.createBitmap(di.bitmap);		
-		canvas = new Canvas(bitmapCarried);
-		Paint tp = new Paint();
-		tp.setColor(0xffffffff);
-		tp.setTextSize(WIDTH/4);
-		canvas.drawText("UNPLACED", 0, HEIGHT/2, tp);
-		di.drawableCarried = new BitmapDrawable(bitmapCarried);
-		di.drawableCarried.setBounds(0, 0, WIDTH, HEIGHT);
 		return di;
 	}
 
