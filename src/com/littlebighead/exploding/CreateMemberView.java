@@ -83,6 +83,16 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
 	private void createMember() {
 		try {
 			Member member = new Member();
+
+			//SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+			//member.setName(preferences.getString(ExplodingPreferences.PLAYER_NAME, ""));
+			
+			member.setName(nameEditText.getText().toString());
+			if (member.getName()==null || member.getName().length()==0) {
+				Toast.makeText(this, "Please give your community member a name", Toast.LENGTH_SHORT).show();
+				return;
+			}
+
 //			EditText et = (EditText)findViewById(R.id.create_member_action_edit_text);
 //			member.setAction(Integer.parseInt(et.getText().toString()));
 //			et = (EditText)findViewById(R.id.create_member_health_edit_text);
@@ -99,10 +109,6 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
 			member.setBrains(attributes[2]);
 			member.setAction(attributes[3]);			
 			member.setLimbData(drawView.body.getLimbInfo());
-			
-			// TODO name?
-			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-			member.setName(preferences.getString(ExplodingPreferences.PLAYER_NAME, ""));
 			
 			ClientState clientState = BackgroundThread.getClientState(this);
 			Client cache = clientState.getCache();
@@ -183,6 +189,7 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
 		}
 		return PlayerColours.values()[player.getColourRef() % PlayerColours.values().length].color();
 	}
+	private EditText nameEditText;
 	// END CMG
 	
     /** Called when the activity is first created. */
@@ -202,9 +209,14 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
         mainLayout.setOrientation(LinearLayout.VERTICAL);
         
         TextView title = new TextView(this);
-        title.setText("Create member");
+        title.setText("Community Member's Name:");
         mainLayout.addView(title);
 
+        nameEditText = new EditText(this);
+        nameEditText.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+        nameEditText.setPadding(5, 5, 5, 5);
+        mainLayout.addView(nameEditText);
+        
         // begin cmg
         Button buttons[] = new Button[4];
         // end cmg
