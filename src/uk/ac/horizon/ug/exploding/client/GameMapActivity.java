@@ -1,5 +1,6 @@
 /**
  * Copyright 2010 The University of Nottingham
+
  * 
  * This file is part of GenericAndroidClient.
  *
@@ -27,8 +28,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.json.JSONStringer;
+
 import uk.ac.horizon.ug.exploding.client.Client.QueuedMessage;
 import uk.ac.horizon.ug.exploding.client.model.Game;
+
+import uk.ac.horizon.ug.exploding.client.logging.ActivityLogger;
+import uk.ac.horizon.ug.exploding.client.logging.LoggingActivity;
+import uk.ac.horizon.ug.exploding.client.logging.LoggingUtils;
+
 import uk.ac.horizon.ug.exploding.client.model.Member;
 import uk.ac.horizon.ug.exploding.client.model.Message;
 import uk.ac.horizon.ug.exploding.client.model.Player;
@@ -87,11 +95,45 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	private MapView mapView;
 	
 	static enum DialogId { PLACE, PLACE_TO_SERVER, CARRY, CARRY_TO_SERVER };
+	private ActivityLogger logger = new ActivityLogger(this);
+
+	public static String LOGTYPE_GAME_ACTION = "GameAction";
+	public static String LOGTYPE_GAME_STATE = "GameState";
+	public static void logAction(String action) {
+		log(LOGTYPE_GAME_ACTION, action, null, null);
+	}
+	public static void logState(String action) {
+		log(LOGTYPE_GAME_STATE, action, null, null);
+	}
+	public static void logAction(String action, String extraKey, Object extraValue) {
+		log(LOGTYPE_GAME_ACTION, action, extraKey, extraValue);
+	}
+	public static void logState(String action, String extraKey, Object extraValue) {
+		log(LOGTYPE_GAME_STATE, action, extraKey, extraValue);
+	}
+	public static void log(String type, String action, String extraKey, Object extraValue) {
+		try {
+			JSONStringer js = new JSONStringer();
+			js.object();
+			js.key("action");
+			js.value(action);
+			if (extraKey!=null) {
+				js.key(extraKey);
+				js.value(extraValue);
+			}
+			js.endObject();
+			LoggingUtils.log(type, js.toString());
+		}
+		catch (Exception e) {
+			Log.e(TAG,"log("+action+","+extraKey+","+extraValue+")", e);
+		}
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
+		logger.logOnCreate(this, savedInstanceState);
 		try {
 			Log.d(TAG, "Try to load map view");
 			setContentView(R.layout.map);
@@ -105,6 +147,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			button.setOnClickListener(new OnClickListener() {
 			    public void onClick(View v) {
 			    	if (canAuthor()) {
+				    	logAction("CreateStoryButton");
 				    	setCurrentMember(null);
 			    		Intent myIntent = new Intent();
 			    		myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.AddStoryView");
@@ -117,6 +160,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 //			button.setOnClickListener(this);
 			button.setOnClickListener(new OnClickListener() {
 			    public void onClick(View v) {
+			    	logAction("CommunitiesButton");
 			    	setCurrentMember(null);
 					Intent myIntent = new Intent();
 					myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.CommunityView");
@@ -129,6 +173,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			button.setOnClickListener(new OnClickListener() {
 			    public void onClick(View v) {
 			    	if (canCreateMember()) {
+				    	logAction("CreateMemberButton");
 				    	setCurrentMember(null);
 			    		Intent myIntent = new Intent();
 			    		myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.CreateMemberView");
@@ -202,6 +247,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		List<Member> members = CommunityView.getMyMembers(clientState);//cache.getFacts(Member.class.getName());
 		TextView membersTextView = (TextView)findViewById(R.id.MemberCntTextView);
 		membersTextView.setText(""+members.size());		
+		logState("updateMembers", "members", members.size());
 		mapView.invalidate();
 	}
 
@@ -221,6 +267,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				TextView yearTextView = (TextView)findViewById(R.id.YearTextView);
 				// END ROBIN
     			yearTextView.setText(game.getYear());
+    			logState("updateYear", "year", game.getYear());
 			}
 		}
 	}
@@ -229,6 +276,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	 * @param zoneID
 	 */
 	protected void zoneChanged(String zoneID) {
+//		logger.log("Zone", "zoneID", zoneID);
 		Log.d(TAG, "Zone change to "+zoneID);
 		if (zoneID!=null) {
 			Vibrator vibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
@@ -238,6 +286,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			// BEGIN ROBIN
     		TextView zoneTextView = (TextView)findViewById(R.id.ZoneTextView);
     		zoneTextView.setText("You are in: "+zoneID);
+    		logState("updateZone", "zoneID", zoneID);
     		// END ROBIN
 		}
 	}		
@@ -259,11 +308,15 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			clientState.getCache().removeFactSilent(message);
 			// BEGIN ROBIN
 			//if (message.getType())...??
+			logState("newMessage", "message", message.toString());
 			Intent myIntent = new Intent();
 			myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.TimeEventDialog");
-			myIntent.putExtra("year", message.getYear());
-			myIntent.putExtra("name", message.getTitle());
-			myIntent.putExtra("desc", message.getDescription());
+			if (message.getYear()!=null)
+				myIntent.putExtra("year", message.getYear());
+			if (message.getTitle()!=null)
+				myIntent.putExtra("name", message.getTitle());
+			if (message.getDescription()!=null)
+				myIntent.putExtra("desc", message.getDescription());
 			playAudio();
 			startActivity(myIntent);
 			// END ROBIN
@@ -273,10 +326,12 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	private MediaPlayer mMediaPlayer = null;
     private void playAudio () {
         try {
-        	if (mMediaPlayer != null) {
+        	if (mMediaPlayer == null)
+	            mMediaPlayer = MediaPlayer.create(this, R.raw.beep);
+        	
+        	if (mMediaPlayer == null) {
 	        	// http://www.soundjay.com/beep-sounds-1.html lots of free beeps here
 	        	if (mMediaPlayer.isPlaying() == false) {
-		            mMediaPlayer = MediaPlayer.create(this, R.raw.beep);
 		            mMediaPlayer.setLooping(false);
 		            mMediaPlayer.start();
 	        	}
@@ -295,6 +350,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		logger.logOnOptionsItemSelected(item);
 		switch (item.getItemId()) {
 		case R.id.map_my_location:
 			centreOnMyLocation();
@@ -392,6 +448,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 
 	@Override
 	protected void onPause() {
+		logger.logOnPause();
 		// TODO Auto-generated method stub
 		//LocationUtils.unregisterOnThread(this, this, null);
 		myLocationOverlay.disableCompass();
@@ -404,6 +461,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	private int placeZone;
 	@Override
 	protected void onResume() {
+		logger.logOnResume();
 		// TODO Auto-generated method stub
 		super.onResume();
 		myLocationOverlay.enableCompass();
@@ -641,6 +699,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	 */
 	protected void carryCurrentMember() {
 		if (currentMember!=null) {
+			logAction("carryMember.start", "memberID", currentMember.getID());
 			Member m = new Member();
 			m.setID(currentMember.getID());
 			m.setCarried(true);
@@ -668,6 +727,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			catch (Exception e) {
 				Toast.makeText(this, "Sorry: "+e, Toast.LENGTH_LONG).show();
 				Log.e(TAG, "Carrying member", e);
+				logAction("carryMember.error", "exception", e.toString());
 			}
 
 		}
@@ -681,6 +741,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	protected void placeCurrentMember() {
 		// TODO Auto-generated method stub
 		if (currentMember!=null) {
+			logAction("placeMember.start", "memberID", currentMember.getID());
 			Member m = new Member();
 			m.setID(currentMember.getID());
 			m.setCarried(false);
@@ -712,6 +773,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			catch (Exception e) {
 				Toast.makeText(this, "Sorry: "+e, Toast.LENGTH_LONG).show();
 				Log.e(TAG, "Placing member", e);
+				logAction("placeMember.error", "exception", e.toString());
 			}
 
 		}
@@ -726,6 +788,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			dismissDialog(DialogId.CARRY_TO_SERVER.ordinal());
 
 		if (status==MessageStatusType.OK) {
+			logAction("carry/placeMember.ok");
 			// fiddle with cache?
 			ClientState cs = BackgroundThread.getClientState(this);
 			if (currentMember!=null && placedMember!=null && cs!=null) {
@@ -736,8 +799,10 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			}
 			//Toast.makeText(this, "Done: the map will update in a moment", Toast.LENGTH_LONG).show();
 		}
-		else
+		else {
+			logAction("carry/placeMember.error", "message", errorMessage);
 			Toast.makeText(this, "Sorry: "+errorMessage, Toast.LENGTH_LONG).show();
+		}
 		// tidy up
 		placeMemberMessage = null;
 		placedMember = null;
@@ -753,12 +818,16 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		if (newFocus instanceof MyMapItem) {
 			MyMapItem mmi = (MyMapItem)newFocus;
 			Log.d(TAG,"Focus changed to "+mmi.getMember().getID());
+			logState("focusChanged", "memberID", mmi.getMember().getID());
+
 			currentMember = mmi.getMember();
 			updateAttributes(mmi.getMember());
 			checkCarry();
 		}
-		else
+		else {
 			updateAttributes(null);
+			logState("focusChanged", "newFocus", newFocus==null ? "null" : newFocus.toString());
+		}
 	}
 
 	/**

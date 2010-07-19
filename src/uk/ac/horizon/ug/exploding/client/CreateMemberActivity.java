@@ -20,6 +20,7 @@
 package uk.ac.horizon.ug.exploding.client;
 
 import uk.ac.horizon.ug.exploding.client.Client.QueuedMessage;
+import uk.ac.horizon.ug.exploding.client.logging.LoggingActivity;
 import uk.ac.horizon.ug.exploding.client.model.Member;
 import uk.ac.horizon.ug.exploding.client.model.Position;
 import android.app.Activity;
@@ -40,7 +41,7 @@ import android.widget.Toast;
  * @author cmg
  *
  */
-public class CreateMemberActivity extends Activity implements ClientMessageListener {
+public class CreateMemberActivity extends LoggingActivity implements ClientMessageListener {
 
 	private static final String TAG = "CreateMember";
 
@@ -109,6 +110,8 @@ public class CreateMemberActivity extends Activity implements ClientMessageListe
 			member.setZone(clientState.getZoneOrgID());
 			cache = clientState.getCache();
 			
+			GameMapActivity.logAction("createMember.start", "member", member);
+			
 			// Note: this is (now) an async action
 			createMemberMessage = cache.queueMessage(cache.addFactMessage(member), this);
 			Log.i(TAG,"Creating member: "+member);
@@ -118,6 +121,7 @@ public class CreateMemberActivity extends Activity implements ClientMessageListe
 		catch (Exception e) {
 			Toast.makeText(this, "Sorry: "+e, Toast.LENGTH_LONG).show();
 			Log.e(TAG, "Creating member", e);
+			GameMapActivity.logAction("createMember.error", "exception", e.toString());
 		}
 	}
 
@@ -134,10 +138,14 @@ public class CreateMemberActivity extends Activity implements ClientMessageListe
 		Log.d(TAG,"onMessageResponse: status="+status+", error="+errorMessage+", value="+value);
 		dismissDialog(DialogId.CREATING_MEMBER.ordinal());
 
-		if (status==MessageStatusType.OK)
+		if (status==MessageStatusType.OK) {
 			this.finish();
-		else
+			GameMapActivity.logAction("createMember.ok");
+		}
+		else {
 			Toast.makeText(this, "Sorry: "+errorMessage, Toast.LENGTH_LONG).show();
+			GameMapActivity.logAction("createMember.error", "error", errorMessage);
+		}
 		// tidy up
 		createMemberMessage = null;
 		cache = null;

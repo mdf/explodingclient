@@ -16,6 +16,8 @@ import android.widget.TextView;
 //public class CommunityPropsDialog {
 public class CommunityPropsDialog extends Dialog {
 
+	// TODO Logging
+	
     public interface ReadyListener {
         public void ready(String name);
     }

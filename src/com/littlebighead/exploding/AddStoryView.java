@@ -2,6 +2,8 @@ package com.littlebighead.exploding;
 
 
 import uk.ac.horizon.ug.exploding.client.R;
+import uk.ac.horizon.ug.exploding.client.logging.LoggingActivity;
+
 import android.app.Activity;
 import android.content.Intent;
 
@@ -19,7 +21,7 @@ import android.view.View.OnClickListener;
 
 
 
-public class AddStoryView extends Activity {	//implements OnClickListener {
+public class AddStoryView extends LoggingActivity {	//implements OnClickListener {
 	
 	
     /** Called when the activity is first created. */

@@ -11,6 +11,7 @@ import uk.ac.horizon.ug.exploding.client.ClientState;
 import uk.ac.horizon.ug.exploding.client.ClientStateListener;
 import uk.ac.horizon.ug.exploding.client.GameMapActivity;
 import uk.ac.horizon.ug.exploding.client.R;
+import uk.ac.horizon.ug.exploding.client.logging.LoggingActivity;
 import uk.ac.horizon.ug.exploding.client.model.Member;
 import uk.ac.horizon.ug.exploding.client.model.Player;
 import android.app.Activity;
@@ -38,7 +39,7 @@ import android.view.View.OnClickListener;
 
 
 
-public class CommunityView extends Activity implements ClientStateListener {	//implements OnClickListener {
+public class CommunityView extends LoggingActivity implements ClientStateListener {	//implements OnClickListener {
 	private static final String TAG = "CommunityView";
 
 	public Dialog dialog;

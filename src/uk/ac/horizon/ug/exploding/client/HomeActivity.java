@@ -22,6 +22,9 @@ package uk.ac.horizon.ug.exploding.client;
 import java.util.List;
 
 import uk.ac.horizon.ug.exploding.client.AudioUtils.SoundAttributes;
+
+import uk.ac.horizon.ug.exploding.client.logging.LoggingActivity;
+
 import uk.ac.horizon.ug.exploding.client.model.Player;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -65,7 +68,7 @@ import android.widget.Toast;
  * @author robin
  *
  */
-public class HomeActivity extends Activity implements ClientStateListener {
+public class HomeActivity extends LoggingActivity implements ClientStateListener {
 	private static final String TAG = "HomeActivity";
     /** Called when the activity is first created. */
     @Override

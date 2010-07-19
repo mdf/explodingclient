@@ -12,6 +12,7 @@ import uk.ac.horizon.ug.exploding.client.GameMapActivity;
 import uk.ac.horizon.ug.exploding.client.MessageStatusType;
 import uk.ac.horizon.ug.exploding.client.R;
 import uk.ac.horizon.ug.exploding.client.Client.QueuedMessage;
+import uk.ac.horizon.ug.exploding.client.logging.LoggingActivity;
 import uk.ac.horizon.ug.exploding.client.model.Member;
 import uk.ac.horizon.ug.exploding.client.model.Player;
 import uk.ac.horizon.ug.exploding.client.model.Position;
@@ -50,7 +51,7 @@ import android.view.ViewGroup.LayoutParams;
 
 
 
-public class CreateMemberView extends Activity implements ClientMessageListener {	//implements OnClickListener {
+public class CreateMemberView extends LoggingActivity implements ClientMessageListener {	//implements OnClickListener {
     DrawView drawView;	
 	
     // BEGIN CMG
