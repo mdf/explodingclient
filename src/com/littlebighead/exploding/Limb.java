@@ -45,20 +45,20 @@ public class Limb {	//extends uk.ac.horizon.ug.exploding.client.model.Limb {
 		gfx.endFill(); */
 	}
 	
-	
+	private static final double EYE_SIZE = 0.2d;
 	public void drawEyes(Canvas canvas) {
         ShapeDrawable mDrawable = new ShapeDrawable(new OvalShape());
         mDrawable.getPaint().setColor(0xffffffff);
         
         double ypos = y-(Math.random()*xradius-(xradius*0.5d));
 //        setOval(mDrawable, x-(xradius*0.3d), ypos, xradius*0.1d, xradius*0.2d);
-        setCircle(mDrawable, x-(xradius*0.3d), ypos, xradius*0.1d);
-        setCircle(mDrawable, x-(xradius*0.3d), ypos, xradius*0.1d);
+//        setCircle(mDrawable, x-(xradius*0.3d), ypos, xradius*EYE_SIZE);
+        setCircle(mDrawable, x-(xradius*0.3d), ypos, xradius*EYE_SIZE);
         mDrawable.draw(canvas);	//draws mDrawable to canvas
 
 //        setOval(mDrawable, x+(xradius*0.3d), ypos, xradius*0.1d, xradius*0.2d);
-        setCircle(mDrawable, x+(xradius*0.3d), ypos+xradius*0.1d, xradius*0.1d);
-        setCircle(mDrawable, x+(xradius*0.3d), ypos+xradius*0.1d, xradius*0.1d);
+//        setCircle(mDrawable, x+(xradius*0.3d), ypos+xradius*0.1d, xradius*EYE_SIZE);
+        setCircle(mDrawable, x+(xradius*0.3d), ypos+xradius*0.1d, xradius*EYE_SIZE);
 //        mDrawable.setBounds(x+radius, y-radius, x + radius*2, y + radius*2);
         mDrawable.draw(canvas);	//draws mDrawable to canvas
 
