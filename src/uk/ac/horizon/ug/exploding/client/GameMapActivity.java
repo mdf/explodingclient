@@ -146,7 +146,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			//button.setOnClickListener(this);
 			button.setOnClickListener(new OnClickListener() {
 			    public void onClick(View v) {
-			    	if (canAuthor()) {
+			    	if (canAuthor(true)) {
 				    	logAction("CreateStoryButton");
 				    	setCurrentMember(null);
 			    		Intent myIntent = new Intent();
@@ -172,7 +172,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 //			button.setOnClickListener(this);
 			button.setOnClickListener(new OnClickListener() {
 			    public void onClick(View v) {
-			    	if (canCreateMember()) {
+			    	if (canCreateMember(true)) {
 				    	logAction("CreateMemberButton");
 				    	setCurrentMember(null);
 			    		Intent myIntent = new Intent();
@@ -210,6 +210,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		types.add(Message.class.getName());
 		types.add(Game.class.getName());
 		types.add(Member.class.getName());
+		types.add(Player.class.getName());
 		BackgroundThread.addClientStateListener(this, this, ClientState.Part.ZONE.flag(), types);
 		ClientState clientState = BackgroundThread.getClientState(this);
 		clientStateChanged(clientState, true);
@@ -235,8 +236,27 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			checkYear(clientState);
 		if (isInitial || clientState.getChangedTypes().contains(Member.class.getName()))
 			updateMembers(clientState);
+		if (isInitial || clientState.getChangedTypes().contains(Player.class.getName()))
+			updateButtons(clientState);
 	}
 
+	/**
+	 * @param clientState
+	 */
+	private void updateButtons(ClientState clientState) {
+		Client cache = clientState.getCache();
+		if (cache==null)
+			return;
+		Player player = (Player)cache.getFirstFact(Player.class.getName());
+		Button button;
+		button = (Button)findViewById(R.id.map_story_button);
+		button.setEnabled(canAuthor(false));
+		button = (Button)findViewById(R.id.map_create_button);
+		button.setEnabled(canCreateMember(false));
+		button = (Button)findViewById(R.id.map_community_button);
+		// dis/enable communities
+		button.setEnabled(cache.getFirstFact(Member.class.getName())!=null);
+	}
 	/**
 	 * @param clientState
 	 */
@@ -364,7 +384,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		}			
 		case R.id.map_menu_create_member:
 		{
-			if (!canCreateMember())
+			if (!canCreateMember(true))
 				return true;
 			Intent intent = new Intent();
 			intent.setClass(this, CreateMemberActivity.class);
@@ -374,24 +394,26 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	private boolean canCreateMember() {
+	private boolean canCreateMember(boolean notify) {
 		// check if we can...
 		Player player = getPlayer();
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean standaloneMode = preferences.getBoolean("standaloneMode", false);
 		if (!standaloneMode && (player==null || !player.isSetNewMemberQuota() || player.getNewMemberQuota()<1)) {
-			Toast.makeText(this, "You cannot create a member yet - keep playing", Toast.LENGTH_LONG).show();
+			if (notify)
+				Toast.makeText(this, "You cannot create a member yet - keep playing", Toast.LENGTH_LONG).show();
 			return false;
 		}
 		return true;
 	}
-	private boolean canAuthor() {
+	private boolean canAuthor(boolean notify) {
 		// check if we can...
 		Player player = getPlayer();
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean standaloneMode = preferences.getBoolean("standaloneMode", false);
 		if (!standaloneMode && (player==null || !player.isSetCanAuthor() || player.getCanAuthor()==false)) {
-			Toast.makeText(this, "You cannot create a story yet - keep playing", Toast.LENGTH_LONG).show();
+			if (notify)
+				Toast.makeText(this, "You cannot create a story yet - keep playing", Toast.LENGTH_LONG).show();
 			return false;
 		}
 		return true;
