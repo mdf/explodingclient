@@ -70,8 +70,10 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
 			creatingPd.setOnCancelListener(new OnCancelListener() {
 				@Override
 				public void onCancel(DialogInterface dialog) {
-					if (cache!=null && createMemberMessage!=null)
+					if (cache!=null && createMemberMessage!=null) {
+						GameMapActivity.logAction("createMember.cancel");
 						cache.cancelMessage(createMemberMessage, true);
+					}
 				}
 			});
 			return creatingPd;
@@ -120,7 +122,9 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
 			member.setCarried(true);
 			
 			cache = clientState.getCache();
-			
+
+			GameMapActivity.logAction("createMember.start", "member", member.toString());
+
 			// Note: this is (now) an async action
 			createMemberMessage = cache.queueMessage(cache.addFactMessage(member), this);
 			Log.i(TAG,"Creating member: "+member);
@@ -133,6 +137,7 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
 		catch (Exception e) {
 			Toast.makeText(this, "Sorry: "+e, Toast.LENGTH_LONG).show();
 			Log.e(TAG, "Creating member", e);
+			GameMapActivity.logAction("createMember.error", "exception", e.toString());
 		}
 	}
 
@@ -143,6 +148,7 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
 		dismissDialog(DialogId.CREATING_MEMBER.ordinal());
 
 		if (status==MessageStatusType.OK) {
+			GameMapActivity.logAction("createMember.ok");
 	    	Intent resultIntent = new Intent();
 	    	setResult(Activity.RESULT_OK, resultIntent);            		    	
 			this.finish();
@@ -150,6 +156,7 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
 		else {
 			Toast.makeText(this, "Sorry: "+errorMessage, Toast.LENGTH_LONG).show();
 			GameMapActivity.setCurrentMember(null);
+			GameMapActivity.logAction("createMember.error", "error", errorMessage);
 		}
 		// tidy up
 		createMemberMessage = null;
@@ -280,8 +287,5 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
 
 
     }
-    
-
-
 }
 
