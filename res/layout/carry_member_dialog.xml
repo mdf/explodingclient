@@ -5,15 +5,15 @@
   android:layout_width="fill_parent"
   android:layout_height="fill_parent">
 
-<TextView android:text="Click MOVE if you want to move this one or CANCEL if you want to leave it" android:layout_width="wrap_content" android:layout_height="wrap_content"/>  
+<TextView android:text="Click MOVE if you want to move this one or CANCEL if you want to leave it" android:layout_margin="4px" android:layout_width="wrap_content" android:layout_height="wrap_content"/>  
 
 <LinearLayout
   android:orientation="horizontal"
   android:layout_width="fill_parent"
   android:layout_height="wrap_content">
 
-<Button android:text="MOVE" android:id="@+id/carry_member_dialog_ok_button" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-<Button android:text="CANCEL" android:id="@+id/carry_member_dialog_cancel_button" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+<Button android:text="MOVE" android:id="@+id/carry_member_dialog_ok_button" android:layout_width="fill_parent" android:layout_weight="1" android:layout_height="wrap_content"/>
+<Button android:text="CANCEL" android:id="@+id/carry_member_dialog_cancel_button" android:layout_width="fill_parent" android:layout_weight="1" android:layout_height="wrap_content"/>
 
 </LinearLayout>
   

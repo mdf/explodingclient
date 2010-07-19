@@ -51,6 +51,8 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 		return members.size();
 	}
 	public synchronized int indexOf(Member member) {
+		if (members==null)
+			return -1;
 		return members.indexOf(member);
 	}
 	/* (non-Javadoc)
@@ -58,6 +60,8 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 	 */
 	@Override
 	public synchronized void clientStateChanged(final ClientState clientState) {
+		List<Object> members = null;
+		
 		if (clientState==null  || clientState.getCache()==null) 
 			members = null;
 		else {	
@@ -81,6 +85,7 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 		Log.d(TAG,"Members changed: "+size()+" found");
 		setLastFocusedIndex(-1);
 		setFocus(null);
+		this.members = members;
 		populate();		
 	}
 	@Override

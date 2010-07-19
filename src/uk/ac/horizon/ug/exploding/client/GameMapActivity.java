@@ -533,6 +533,9 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			return false;
 		if (currentMember.isSetCarried() && currentMember.getCarried())
 			return false;
+		// "avatar" - can't pick up first member - it should follow you
+		if (currentMember.getParentMemberID()==null)
+			return false;
 		ClientState cs = BackgroundThread.getClientState(this);
 		if (cs==null)
 			return false;

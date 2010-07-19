@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import uk.ac.horizon.ug.exploding.client.BackgroundThread;
 import uk.ac.horizon.ug.exploding.client.model.Member;
 
 import android.graphics.Bitmap;
@@ -64,7 +65,10 @@ public class MemberDrawableCache {
 		return getDrawableInfo(member).bitmap;
 	}
 	private static synchronized DrawableInfo getDrawableInfo(Member member) {
-		MemberInfo mi = new MemberInfo(member.getLimbData(), PlayerColours.values()[member.isSetColourRef() ? member.getColourRef() % PlayerColours.values().length : 0].color());
+		if (member.getLimbData()==null) {
+			Log.e(TAG,"Member with null limbData: "+member.getID());
+		}
+		MemberInfo mi = new MemberInfo(member.getLimbData(), PlayerColours.values()[member.isSetColourRef() ? member.getColourRef() % PlayerColours.values().length : 0].color(), member.getParentMemberID()==null);
 		DrawableInfo di = cache.get(mi);
 		if (di==null) {
 			di = createDrawableInfo(mi);
@@ -77,6 +81,8 @@ public class MemberDrawableCache {
 	static final int selected[] = new int[] { android.R.attr.state_selected };
 	static final int unselected[] = new int[] { };
 	protected static final String TAG = "MemberDrawableCache";
+	private static final int AVATAR_RADIUS = 8;
+	private static final int AVATAR_RADIUS2 = 4;
 	static Drawable selectedDrawable = null;
 	/**
 	 * @param mi
@@ -86,7 +92,8 @@ public class MemberDrawableCache {
 		DrawableInfo di = new DrawableInfo();
 
 		Body body = new Body(mi.color);
-		body.setLimbInfo(mi.limbInfo);
+		if (mi.limbInfo!=null)
+			body.setLimbInfo(mi.limbInfo);
 		float minY = body.getMinY();
 		float radius = body.getRadius();
 
@@ -95,9 +102,20 @@ public class MemberDrawableCache {
 		Canvas canvas = new Canvas(bitmap);
 		//canvas.drawARGB(0, 0, 0, 0);
 		canvas.drawARGB(0xff, 0xff, 0xff, 0xff);
+		canvas.save();
 		canvas.translate(WIDTH/2, 5+HEIGHT/2*(-minY)/radius);
 		canvas.scale(1.0f*(WIDTH-10)/(2*radius), 1.0f*(HEIGHT-10)/(2*radius));
 		body.draw(canvas, false);
+		canvas.restore();
+		if (mi.avatar) {
+			Paint sp = new Paint();
+			sp.setColor(0xff000000);
+			sp.setStyle(Paint.Style.FILL);
+			//sp.setStrokeWidth(3);
+			canvas.drawOval(new RectF(WIDTH/2-AVATAR_RADIUS, HEIGHT/2-AVATAR_RADIUS,WIDTH/2+AVATAR_RADIUS,HEIGHT/2+AVATAR_RADIUS), sp);
+			sp.setColor(0xffffffff);
+			canvas.drawOval(new RectF(WIDTH/2-AVATAR_RADIUS2, HEIGHT/2-AVATAR_RADIUS2,WIDTH/2+AVATAR_RADIUS2,HEIGHT/2+AVATAR_RADIUS2), sp);
+		}
 		Drawable d = new BitmapDrawable(bitmap);
 		d.setBounds(0, 0, WIDTH, HEIGHT);
 		di.drawable = d;
@@ -117,6 +135,7 @@ public class MemberDrawableCache {
 		di.bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888);
 		canvas = new Canvas(di.bitmap);
 		canvas.drawARGB(0, 0, 0, 0);
+		canvas.save();
 		//canvas.drawARGB(0xff, 0xff, 0xff, 0xff);
 		canvas.translate(WIDTH/2, 5+HEIGHT/2*(-minY)/radius);
 //		canvas.scale(1.0f*(WIDTH-10)/(2*radius), 1.0f*(HEIGHT-10)/(2*radius));
@@ -124,6 +143,16 @@ public class MemberDrawableCache {
 		body.drawShadow(canvas, 0);//5*2*radius/(HEIGHT-10));
 		canvas.scale(1.0f*(WIDTH-10)/(WIDTH), 1.0f*(HEIGHT-10)/HEIGHT);
 		body.draw(canvas, false);
+		canvas.restore();
+		if (mi.avatar) {
+			Paint sp = new Paint();
+			sp.setColor(0xff000000);
+			sp.setStyle(Paint.Style.FILL);
+			//sp.setStrokeWidth(3);
+			canvas.drawOval(new RectF(WIDTH/2-AVATAR_RADIUS, HEIGHT/2-AVATAR_RADIUS,WIDTH/2+AVATAR_RADIUS,HEIGHT/2+AVATAR_RADIUS), sp);
+			sp.setColor(0xffffffff);
+			canvas.drawOval(new RectF(WIDTH/2-AVATAR_RADIUS2, HEIGHT/2-AVATAR_RADIUS2,WIDTH/2+AVATAR_RADIUS2,HEIGHT/2+AVATAR_RADIUS2), sp);
+		}
 
 		StateListDrawable sld = new StateListDrawable() {
 			@Override
@@ -134,7 +163,8 @@ public class MemberDrawableCache {
 			}
 			
 		};
-		sld.setBounds(-WIDTH/2, -HEIGHT/2, WIDTH/2, HEIGHT/2);
+//		sld.setBounds(-WIDTH/2, -HEIGHT/2, WIDTH/2, HEIGHT/2);
+		sld.setBounds(-WIDTH/2, -HEIGHT, WIDTH/2, 0);
 		di.drawableMap = sld;
 		Bitmap bitmapSelected = Bitmap.createBitmap(di.bitmap);
 		canvas = new Canvas(bitmapSelected);
@@ -164,19 +194,22 @@ public class MemberDrawableCache {
 	static class MemberInfo {
 		String limbInfo;
 		int color;
+		boolean avatar;
 		/**
 		 * @param limbInfo
 		 * @param color
 		 */
-		public MemberInfo(String limbInfo, int color) {
+		public MemberInfo(String limbInfo, int color, boolean avatar) {
 			super();
 			this.limbInfo = limbInfo;
 			this.color = color;
+			this.avatar = avatar;
 		}
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
+			result = prime * result + (avatar ? 1231 : 1237);
 			result = prime * result + color;
 			result = prime * result
 					+ ((limbInfo == null) ? 0 : limbInfo.hashCode());
@@ -191,6 +224,8 @@ public class MemberDrawableCache {
 			if (getClass() != obj.getClass())
 				return false;
 			MemberInfo other = (MemberInfo) obj;
+			if (avatar != other.avatar)
+				return false;
 			if (color != other.color)
 				return false;
 			if (limbInfo == null) {
