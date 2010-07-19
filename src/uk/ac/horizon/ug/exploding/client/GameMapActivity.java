@@ -265,6 +265,30 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		if (cache==null)
 			return;
 		List<Member> members = CommunityView.getMyMembers(clientState);//cache.getFacts(Member.class.getName());
+		Member average = new Member();
+		average.setHealth(0);
+		average.setWealth(0);
+		average.setAction(0);
+		average.setBrains(0);
+		for (Member member : members) {
+			if (member.isSetHealth())
+				average.setHealth(average.getHealth()+member.getHealth());
+			if (member.isSetWealth())
+				average.setWealth(average.getWealth()+member.getWealth());
+			if (member.isSetAction())
+				average.setAction(average.getAction()+member.getAction());
+			if (member.isSetBrains())
+				average.setBrains(average.getBrains()+member.getBrains());
+		}
+		if (members.size()>0) {
+			average.setHealth(average.getHealth()/members.size());
+			average.setWealth(average.getWealth()/members.size());
+			average.setAction(average.getAction()/members.size());
+			average.setBrains(average.getBrains()/members.size());
+			updateAttributes2(average);
+		}
+		else
+			updateAttributes2(null);
 		TextView membersTextView = (TextView)findViewById(R.id.MemberCntTextView);
 		membersTextView.setText(""+members.size());		
 		logState("updateMembers", "members", members.size());
@@ -490,7 +514,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		myLocationOverlay.enableMyLocation();
 //		LocationUtils.registerOnThread(this, this, null);
 		itemOverlay.setFocus(null);
-		updateAttributes(currentMember);
+		//updateAttributes(currentMember);
 		if (currentMember!=null) {
 			if (currentMember.isSetCarried() && currentMember.getCarried()) {
 				ClientState cs = BackgroundThread.getClientState(this);
@@ -846,11 +870,11 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			logState("focusChanged", "memberID", mmi.getMember().getID());
 
 			currentMember = mmi.getMember();
-			updateAttributes(mmi.getMember());
+			//updateAttributes(mmi.getMember());
 			checkCarry();
 		}
 		else {
-			updateAttributes(null);
+			//updateAttributes(null);
 			logState("focusChanged", "newFocus", newFocus==null ? "null" : newFocus.toString());
 		}
 	}
@@ -858,7 +882,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	/**
 	 * @param member
 	 */
-	private void updateAttributes(Member member) {
+	private void updateAttributes2(Member member) {
 		TextView tv;
 		tv = (TextView)findViewById(R.id.ActionTextView);
 		tv.setText(member==null ? "-" : ""+member.getAction());
