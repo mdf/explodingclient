@@ -7,12 +7,14 @@ import uk.ac.horizon.ug.exploding.client.model.Position;
 import java.util.LinkedList;
 import java.util.List;
 
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
+import com.google.android.maps.MapView;
 import com.littlebighead.exploding.MemberDrawableCache;
 
 /** just a test for now */
@@ -96,6 +98,33 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 			setFocus(getItem(index));
 		return true;
 		//return super.onTap(index);
+	}
+	/* (non-Javadoc)
+	 * @see com.google.android.maps.ItemizedOverlay#draw(android.graphics.Canvas, com.google.android.maps.MapView, boolean)
+	 */
+	@Override
+	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
+		try {
+			super.draw(canvas, mapView, shadow);
+		}
+		catch (Exception e) {
+			Log.e(TAG,"in ItemizedOverlay.draw()", e);
+		}
+	}
+	/* (non-Javadoc)
+	 * @see com.google.android.maps.Overlay#draw(android.graphics.Canvas, com.google.android.maps.MapView, boolean, long)
+	 */
+	@Override
+	public boolean draw(Canvas canvas, MapView mapView, boolean shadow,
+			long when) {
+		try {
+			return super.draw(canvas, mapView, shadow, when);
+		}
+		catch (Exception e) {
+			Log.e(TAG,"in Overlay.draw()", e);
+		}
+		// no more animation...
+		return false;
 	}
 	
 }

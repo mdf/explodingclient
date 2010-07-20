@@ -189,6 +189,12 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			myLocationOverlay.runOnFirstFix(new Runnable() {
 				public void run() {
 					centreOnMyLocation();
+					
+					if (currentMember!=null) {
+						if (currentMember.isSetCarried() && currentMember.getCarried()) {					
+							askToPlace();
+						} 
+					}
 				}
 			});
 			Resources res = getResources();
@@ -430,7 +436,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
         	if (mMediaPlayer == null)
 	            mMediaPlayer = MediaPlayer.create(this, R.raw.beep);
         	
-        	if (mMediaPlayer == null) {
+        	if (mMediaPlayer != null) {
 	        	// http://www.soundjay.com/beep-sounds-1.html lots of free beeps here
 	        	if (mMediaPlayer.isPlaying() == false) {
 		            mMediaPlayer.setLooping(false);
@@ -574,14 +580,9 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		//updateAttributes(currentMember);
 		if (currentMember!=null) {
 			if (currentMember.isSetCarried() && currentMember.getCarried()) {
-				ClientState cs = BackgroundThread.getClientState(this);
-				placeLocation = LocationUtils.getCurrentLocation(this);
-				placeZone = cs.getZoneOrgID();
+				
 				centreOnMyLocation();
-				// drop...
-				if (placeLocation!=null) {
-					showDialog(DialogId.PLACE.ordinal());
-				}
+				askToPlace();
 			} 
 			else {
 				if (currentMember.isSetPosition()) {
@@ -600,6 +601,25 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			}
 		}
 	}		
+	private void askToPlace() {
+		if (currentMember==null || !currentMember.isSetCarried() || !currentMember.getCarried())
+		{
+			Log.e(TAG,"askToPlace called with null/uncarried member: "+currentMember);
+			return;
+		}
+		try {
+			ClientState cs = BackgroundThread.getClientState(this);
+			placeLocation = LocationUtils.getCurrentLocation(this);
+			placeZone = cs.getZoneOrgID();
+			// drop...
+			if (placeLocation!=null) {
+				showDialog(DialogId.PLACE.ordinal());
+			}
+		}
+		catch (Exception e) {
+			Log.e(TAG,"askToPlace()", e);
+		}
+	}
 	/**
 	 * 
 	 */
