@@ -94,7 +94,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	private MyMapOverlay itemOverlay;
 	private static Member currentMember;
 	private MapView mapView;
-	
+
 	static enum DialogId { PLACE, PLACE_TO_SERVER, CARRY, CARRY_TO_SERVER /*, NEW_CONTENT*/ };
 	private ActivityLogger logger = new ActivityLogger(this);
 
@@ -129,7 +129,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			Log.e(TAG,"log("+action+","+extraKey+","+extraValue+")", e);
 		}
 	}
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -139,30 +139,30 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			Log.d(TAG, "Try to load map view");
 			setContentView(R.layout.map);
 			// BEGIN Robin's code - from com.littlebighead.exploding.GameMapView
-	        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			mapView = (MapView)findViewById(R.id.map_view);
-	        mapView.setReticleDrawMode(MapView.ReticleDrawMode.DRAW_RETICLE_OVER);
+			mapView.setReticleDrawMode(MapView.ReticleDrawMode.DRAW_RETICLE_OVER);
 			Button button = (Button)findViewById(R.id.map_story_button);
 
 			//button.setOnClickListener(this);
 			button.setOnClickListener(new OnClickListener() {
-			    public void onClick(View v) {
-			    	if (canAuthor(true)) {
-				    	logAction("CreateStoryButton");
-				    	setCurrentMember(null);
-			    		Intent myIntent = new Intent();
-			    		myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.AddStoryView");
-			    		startActivity(myIntent);
-			    	}
+				public void onClick(View v) {
+					if (canAuthor(true)) {
+						logAction("CreateStoryButton");
+						setCurrentMember(null);
+						Intent myIntent = new Intent();
+						myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.AddStoryView");
+						startActivity(myIntent);
+					}
 				}
 			});
-			
+
 			button = (Button)findViewById(R.id.map_community_button);
-//			button.setOnClickListener(this);
+			//			button.setOnClickListener(this);
 			button.setOnClickListener(new OnClickListener() {
-			    public void onClick(View v) {
-			    	logAction("CommunitiesButton");
-			    	setCurrentMember(null);
+				public void onClick(View v) {
+					logAction("CommunitiesButton");
+					setCurrentMember(null);
 					Intent myIntent = new Intent();
 					myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.CommunityView");
 					startActivity(myIntent);
@@ -170,18 +170,19 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			});
 
 			button = (Button)findViewById(R.id.map_create_button);
-//			button.setOnClickListener(this);
+			//			button.setOnClickListener(this);
 			button.setOnClickListener(new OnClickListener() {
-			    public void onClick(View v) {
-			    	if (canCreateMember(true)) {
-				    	logAction("CreateMemberButton");
-				    	setCurrentMember(null);
-			    		Intent myIntent = new Intent();
-			    		myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.CreateMemberView");
-			    		startActivityForResult(myIntent,1);
-			    	}
+				public void onClick(View v) {
+					if (canCreateMember(true)) {
+						logAction("CreateMemberButton");
+						setCurrentMember(null);
+						Intent myIntent = new Intent();
+						myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.CreateMemberView");
+						startActivityForResult(myIntent,1);
+					}
 				}
 			});
+
 
 			// END Robin's code
 			mapView.setBuiltInZoomControls(true);
@@ -189,7 +190,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			myLocationOverlay.runOnFirstFix(new Runnable() {
 				public void run() {
 					centreOnMyLocation();
-					
+
 					if (currentMember!=null) {
 						if (currentMember.isSetCarried() && currentMember.getCarried()) {					
 							askToPlace();
@@ -205,7 +206,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			itemOverlay = new MyMapOverlay(drawable, clientState);
 			BackgroundThread.addClientStateListener(itemOverlay, this, Member.class.getName());
 			itemOverlay.setOnFocusChangeListener(this);
-			
+
 			mapView.getOverlays().add(myLocationOverlay);
 			mapView.getOverlays().add(itemOverlay);
 
@@ -226,12 +227,12 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	private static final long ZONE_VIBRATE_MS = 500;
 
 	private String currentYear = null;
-	
+
 	@Override
 	public void clientStateChanged(final ClientState clientState) {
 		clientStateChanged(clientState, false);
 	}
-	
+
 	public void clientStateChanged(final ClientState clientState, boolean isInitial) {
 		if (clientState==null)
 			return;
@@ -317,8 +318,8 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				// BEGIN ROBIN
 				TextView yearTextView = (TextView)findViewById(R.id.YearTextView);
 				// END ROBIN
-    			yearTextView.setText(game.getYear());
-    			logState("updateYear", "year", game.getYear());
+				yearTextView.setText(game.getYear());
+				logState("updateYear", "year", game.getYear());
 			}
 		}
 	}
@@ -327,7 +328,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	 * @param zoneID
 	 */
 	protected void zoneChanged(String zoneID) {
-//		logger.log("Zone", "zoneID", zoneID);
+		//		logger.log("Zone", "zoneID", zoneID);
 		Log.d(TAG, "Zone change to "+zoneID);
 		if (zoneID!=null) {
 			Vibrator vibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
@@ -335,10 +336,10 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				vibrator.vibrate(ZONE_VIBRATE_MS);
 			Toast.makeText(GameMapActivity.this, "Entered zone "+zoneID, Toast.LENGTH_SHORT).show();
 			// BEGIN ROBIN
-    		TextView zoneTextView = (TextView)findViewById(R.id.ZoneTextView);
-    		zoneTextView.setText("You are in: "+zoneID);
-    		logState("updateZone", "zoneID", zoneID);
-    		// END ROBIN
+			TextView zoneTextView = (TextView)findViewById(R.id.ZoneTextView);
+			zoneTextView.setText("You are in: "+zoneID);
+			logState("updateZone", "zoneID", zoneID);
+			// END ROBIN
 		}
 	}		
 	/**
@@ -351,9 +352,9 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		if (messages.size()==0)
 			return;
 		Log.d(TAG,"Messages: "+messages.size());
-		
+
 		playAudio();
-		
+
 		Message bestContentMessage = null;
 		for (Object m : messages) {
 			Message message = (Message)m;
@@ -369,7 +370,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				else if (uk.ac.horizon.ug.exploding.client.model.Message.MSG_TIMELINE_CONTENT_GLOBAL.equals(message.getType()))
 					// global event > non-global
 					bestContentMessage = message;
-						
+
 			}
 			else {
 				logState("newMessage.context", "message", message.toString());
@@ -387,73 +388,97 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			logState("newMessage", "message", currentMessage.toString());
 			Log.d(TAG,"show NEW_CONTENT dialog for "+currentMessage);
 			//showDialog(DialogId.NEW_CONTENT.ordinal());
-			
-			Intent myIntent = new Intent();
-			myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.TimeEventSmallDialog");
-			if (currentMessage.getYear()!=null)
-				myIntent.putExtra("year", currentMessage.getYear());
-			if (currentMessage.getTitle()!=null)
-				myIntent.putExtra("name", currentMessage.getTitle());
-			if (currentMessage.getDescription()!=null)
-				myIntent.putExtra("desc", currentMessage.getDescription());
 
-			startActivity(myIntent);
+			TextView textview = (TextView)findViewById(R.id.ContentTextView);
+			if (currentMessage != null){
 
-//			Dialog dialog = getNewContentDialog();
-//			if (currentMessage!=null && currentMessage.getTitle()!=null) {
-//				Log.d(TAG,"Prepare NEW_CONTENT dialog with title "+currentMessage.getTitle());
-//				dialog.setTitle(currentMessage.getTitle());
-//			}
-//			else {
-//				Log.e(TAG,"prepare new content dialog with no current message title");
-//				dialog.setTitle("Something's happening...");
-//			}
-//			dialog.show();
-//			
-//			if (newContentTimer!=null)
-//				newContentTimer.cancel();
-//			newContentTimer = new CountDownTimer(NEW_CONTENT_TIME_MS, NEW_CONTENT_TIME_MS) {
-//				@Override
-//				public void onTick(long millisUntilFinished) {
-//				}
-//				@Override
-//				public void onFinish() {
-//					if (newContentDialog!=null && newContentDialog.isShowing()) {
-//						Log.d(TAG,"Timeout dismiss new content dialog");
-//						//dismissDialog(DialogId.NEW_CONTENT.ordinal());
-//						if (newContentDialog!=null && newContentDialog.isShowing())
-//							newContentDialog.hide();
-//					}
-//				}
-//			};
-//			newContentTimer.start();
+				textview.setText(currentMessage.getTitle() + " [more..]");
+				textview.setVisibility(TextView.VISIBLE);
+				textview.setOnClickListener(new OnClickListener(){
+					public void onClick(View v){
+						
+						Intent myIntent = new Intent();
+						myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.TimeEventDialog");
+						
+						if (currentMessage.getYear()!=null)
+							myIntent.putExtra("year", currentMessage.getYear());
+						if (currentMessage.getTitle()!=null)
+							myIntent.putExtra("name", currentMessage.getTitle());
+						if (currentMessage.getDescription()!=null)
+							myIntent.putExtra("desc", currentMessage.getDescription());
+
+						startActivity(myIntent);
+
+					}
+				});
+
+			}
+			//Intent myIntent = new Intent();
+			//myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.TimeEventSmallDialog");
+			//if (currentMessage.getYear()!=null)
+			//	myIntent.putExtra("year", currentMessage.getYear());
+			//if (currentMessage.getTitle()!=null)
+			//	myIntent.putExtra("name", currentMessage.getTitle());
+			//if (currentMessage.getDescription()!=null)
+			//	myIntent.putExtra("desc", currentMessage.getDescription());
+
+			//startActivity(myIntent);
+
+			//			Dialog dialog = getNewContentDialog();
+			//			if (currentMessage!=null && currentMessage.getTitle()!=null) {
+			//				Log.d(TAG,"Prepare NEW_CONTENT dialog with title "+currentMessage.getTitle());
+			//				dialog.setTitle(currentMessage.getTitle());
+			//			}
+			//			else {
+			//				Log.e(TAG,"prepare new content dialog with no current message title");
+			//				dialog.setTitle("Something's happening...");
+			//			}
+			//			dialog.show();
+			//			
+			//			if (newContentTimer!=null)
+			//				newContentTimer.cancel();
+			//			newContentTimer = new CountDownTimer(NEW_CONTENT_TIME_MS, NEW_CONTENT_TIME_MS) {
+			//				@Override
+			//				public void onTick(long millisUntilFinished) {
+			//				}
+			//				@Override
+			//				public void onFinish() {
+			//					if (newContentDialog!=null && newContentDialog.isShowing()) {
+			//						Log.d(TAG,"Timeout dismiss new content dialog");
+			//						//dismissDialog(DialogId.NEW_CONTENT.ordinal());
+			//						if (newContentDialog!=null && newContentDialog.isShowing())
+			//							newContentDialog.hide();
+			//					}
+			//				}
+			//			};
+			//			newContentTimer.start();
 		}
 	}
 	// BEGIN ROBIN
 	private MediaPlayer mMediaPlayer = null;
-    private void playAudio () {
-        try {
-        	if (mMediaPlayer == null)
-	            mMediaPlayer = MediaPlayer.create(this, R.raw.beep);
-        	
-        	if (mMediaPlayer != null) {
-	        	// http://www.soundjay.com/beep-sounds-1.html lots of free beeps here
-	        	if (mMediaPlayer.isPlaying() == false) {
-		            mMediaPlayer.setLooping(false);
-		            mMediaPlayer.start();
-	        	}
-        	}
-        } catch (Exception e) {
-            Log.e("beep", "error: " + e.getMessage(), e);
-        }
-    }
+	private void playAudio () {
+		try {
+			if (mMediaPlayer == null)
+				mMediaPlayer = MediaPlayer.create(this, R.raw.beep);
+
+			if (mMediaPlayer != null) {
+				// http://www.soundjay.com/beep-sounds-1.html lots of free beeps here
+				if (mMediaPlayer.isPlaying() == false) {
+					mMediaPlayer.setLooping(false);
+					mMediaPlayer.start();
+				}
+			}
+		} catch (Exception e) {
+			Log.e("beep", "error: " + e.getMessage(), e);
+		}
+	}
 	// END ROBIN
-//	@Override
-//	public boolean onCreateOptionsMenu(Menu menu) {
-//    	MenuInflater inflater = getMenuInflater();    
-//    	inflater.inflate(R.menu.map_menu, menu);    
-//    	return true;
-//	}
+	//	@Override
+	//	public boolean onCreateOptionsMenu(Menu menu) {
+	//    	MenuInflater inflater = getMenuInflater();    
+	//    	inflater.inflate(R.menu.map_menu, menu);    
+	//    	return true;
+	//	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -575,12 +600,12 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		super.onResume();
 		myLocationOverlay.enableCompass();
 		myLocationOverlay.enableMyLocation();
-//		LocationUtils.registerOnThread(this, this, null);
+		//		LocationUtils.registerOnThread(this, this, null);
 		itemOverlay.setFocus(null);
 		//updateAttributes(currentMember);
 		if (currentMember!=null) {
 			if (currentMember.isSetCarried() && currentMember.getCarried()) {
-				
+
 				centreOnMyLocation();
 				askToPlace();
 			} 
@@ -658,58 +683,58 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		return true;
 	}
 	private static double CARRY_DISTANCE_M = 20;
-//	@Override
-//	public void onLocationChanged(Location location) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void onProviderDisabled(String provider) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void onProviderEnabled(String provider) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void onStatusChanged(String provider, int status, Bundle extras) {
-//		// TODO Auto-generated method stub
-//		
-//	}
+	//	@Override
+	//	public void onLocationChanged(Location location) {
+	//		// TODO Auto-generated method stub
+	//		
+	//	}
+	//
+	//	@Override
+	//	public void onProviderDisabled(String provider) {
+	//		// TODO Auto-generated method stub
+	//		
+	//	}
+	//
+	//	@Override
+	//	public void onProviderEnabled(String provider) {
+	//		// TODO Auto-generated method stub
+	//		
+	//	}
+	//
+	//	@Override
+	//	public void onStatusChanged(String provider, int status, Bundle extras) {
+	//		// TODO Auto-generated method stub
+	//		
+	//	}
 
-	
+
 	// BEGIN ROBIN  com.littlebighead.exploding.GameMapView
 	/** create member activity result */
-    @Override 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {     
-      super.onActivityResult(requestCode, resultCode, data); 
-      switch(requestCode) { 
-        case (1) : { 
-          if (resultCode == Activity.RESULT_OK) { 
-        	  
-//        	  ArrayList<Limb> limbs = (ArrayList<Limb>)data.getExtras().get("limbs");
-//        	  for (Limb limb: Body.limbs) {
-//        		  Log.i("limb position", Double.toString(limb.x));
-//       	  }
-        	  // can't place immediately for now so push to community with a message
-        	  Toast.makeText(this, "Your new community member will appear in a moment", Toast.LENGTH_LONG).show();
+	@Override 
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {     
+		super.onActivityResult(requestCode, resultCode, data); 
+		switch(requestCode) { 
+		case (1) : { 
+			if (resultCode == Activity.RESULT_OK) { 
 
-        	  setCurrentMember(null);
-        	  Intent myIntent = new Intent();
-        	  myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.CommunityView");
-        	  startActivity(myIntent);
-        	  
-          } 
-          break; 
-        } 
-      } 
-    }
-    // END ROBIN
+				//        	  ArrayList<Limb> limbs = (ArrayList<Limb>)data.getExtras().get("limbs");
+				//        	  for (Limb limb: Body.limbs) {
+				//        		  Log.i("limb position", Double.toString(limb.x));
+				//       	  }
+				// can't place immediately for now so push to community with a message
+				Toast.makeText(this, "Your new community member will appear in a moment", Toast.LENGTH_LONG).show();
+
+				setCurrentMember(null);
+				Intent myIntent = new Intent();
+				myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.CommunityView");
+				startActivity(myIntent);
+
+			} 
+			break; 
+		} 
+		} 
+	}
+	// END ROBIN
 
 	public static Member getCurrentMember() {
 		return currentMember;
@@ -718,7 +743,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	public static void setCurrentMember(Member currentMember) {
 		GameMapActivity.currentMember = currentMember;
 	}
-    
+
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		if (id==DialogId.PLACE.ordinal()) {
@@ -748,10 +773,10 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				public void onClick(View arg0) {
 					dialog.cancel();
 				}
-				
+
 			});
 			return dialog;
-			
+
 		}
 		if (id==DialogId.PLACE_TO_SERVER.ordinal()) {
 			ProgressDialog creatingPd = new ProgressDialog(this);
@@ -796,10 +821,10 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				public void onClick(View arg0) {
 					dialog.cancel();
 				}
-				
+
 			});
 			return dialog;
-			
+
 		}
 		if (id==DialogId.CARRY_TO_SERVER.ordinal()) {
 			ProgressDialog creatingPd = new ProgressDialog(this);
@@ -817,69 +842,69 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			});
 			return creatingPd;
 		}
-//		if (id==DialogId.NEW_CONTENT.ordinal()) {
-//			return getNewContentDialog();
-//			
-//		}
+		//		if (id==DialogId.NEW_CONTENT.ordinal()) {
+		//			return getNewContentDialog();
+		//			
+		//		}
 		return super.onCreateDialog(id);
 	}
-	
-// See TimeEventSmallDialog
-//
-//	private Dialog getNewContentDialog() {
-//		final Dialog dialog = new Dialog(this);
-//		dialog.setContentView(R.layout.new_content_dialog);
-//		dialog.setCancelable(true);
-//		dialog.setTitle("{Message...}");
-//		dialog.setOnCancelListener(new OnCancelListener()  {				
-//			@Override
-//			public void onCancel(DialogInterface dialog) {
-//				//dismissDialog(DialogId.NEW_CONTENT.ordinal());
-//				dialog.dismiss();
-//			}
-//		});
-//		Button ok = (Button)dialog.findViewById(R.id.new_content_dialog_ok_button);
-//		ok.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {					
-//				//dismissDialog(DialogId.NEW_CONTENT.ordinal());
-//				dialog.dismiss();
-//				showNewEvent();
-//			}
-//		});
-//		Button cancel = (Button)dialog.findViewById(R.id.new_content_dialog_cancel_button);
-//		cancel.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View arg0) {
-//				dialog.cancel();
-//			}
-//			
-//		});
-//		newContentDialog = dialog;
-//		return dialog;
-//	}
+
+	// See TimeEventSmallDialog
+	//
+	//	private Dialog getNewContentDialog() {
+	//		final Dialog dialog = new Dialog(this);
+	//		dialog.setContentView(R.layout.new_content_dialog);
+	//		dialog.setCancelable(true);
+	//		dialog.setTitle("{Message...}");
+	//		dialog.setOnCancelListener(new OnCancelListener()  {				
+	//			@Override
+	//			public void onCancel(DialogInterface dialog) {
+	//				//dismissDialog(DialogId.NEW_CONTENT.ordinal());
+	//				dialog.dismiss();
+	//			}
+	//		});
+	//		Button ok = (Button)dialog.findViewById(R.id.new_content_dialog_ok_button);
+	//		ok.setOnClickListener(new OnClickListener() {
+	//			@Override
+	//			public void onClick(View v) {					
+	//				//dismissDialog(DialogId.NEW_CONTENT.ordinal());
+	//				dialog.dismiss();
+	//				showNewEvent();
+	//			}
+	//		});
+	//		Button cancel = (Button)dialog.findViewById(R.id.new_content_dialog_cancel_button);
+	//		cancel.setOnClickListener(new OnClickListener() {
+	//			@Override
+	//			public void onClick(View arg0) {
+	//				dialog.cancel();
+	//			}
+	//			
+	//		});
+	//		newContentDialog = dialog;
+	//		return dialog;
+	//	}
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onPrepareDialog(int, android.app.Dialog)
 	 */
 	@Override
 	protected void onPrepareDialog(int id, Dialog dialog) {
-//		if (id==DialogId.NEW_CONTENT.ordinal()) {
-//			// fix title
-//			if (currentMessage!=null && currentMessage.getTitle()!=null) {
-//				Log.d(TAG,"Prepare NEW_CONTENT dialog with title "+currentMessage.getTitle());
-//				dialog.setTitle(currentMessage.getTitle());
-//			}
-//			else {
-//				Log.e(TAG,"prepare new content dialog with no current message title");
-//				dialog.setTitle("Something's happening...");
-//			}
-//		}
+		//		if (id==DialogId.NEW_CONTENT.ordinal()) {
+		//			// fix title
+		//			if (currentMessage!=null && currentMessage.getTitle()!=null) {
+		//				Log.d(TAG,"Prepare NEW_CONTENT dialog with title "+currentMessage.getTitle());
+		//				dialog.setTitle(currentMessage.getTitle());
+		//			}
+		//			else {
+		//				Log.e(TAG,"prepare new content dialog with no current message title");
+		//				dialog.setTitle("Something's happening...");
+		//			}
+		//		}
 		super.onPrepareDialog(id, dialog);
 	}
 	/** message to show if the user asks for details... */
 	private Message currentMessage;
-//	private Dialog newContentDialog;
-//	private CountDownTimer newContentTimer;
+	//	private Dialog newContentDialog;
+	//	private CountDownTimer newContentTimer;
 	protected void showNewEvent() {
 		if (currentMessage==null) {
 			Log.e(TAG,"showNewEvent(null)");
@@ -887,7 +912,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		}
 		// BEGIN ROBIN
 		//if (message.getType())...??
-//		logState("newMessage", "message", currentMessage.toString());
+		//		logState("newMessage", "message", currentMessage.toString());
 		Log.d(TAG,"showNewEvent("+currentMessage+")");
 		logAction("showMessage", "message", currentMessage.toString());
 		Intent myIntent = new Intent();
@@ -915,7 +940,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			m.setPosition(currentMember.getPosition());
 			m.setZone(currentMember.getZone());
 			placedMember = m;
-			
+
 			ClientState cs = BackgroundThread.getClientState(this);
 			if (cs==null) {
 				Log.e(TAG,"carryCurrentMember: ClientState null");
@@ -961,7 +986,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			m.setPosition(pos);
 			m.setZone(placeZone);
 			placedMember = m;
-			
+
 			ClientState cs = BackgroundThread.getClientState(this);
 			if (cs==null) {
 				Log.e(TAG,"placeCurrentMember: ClientState null");
