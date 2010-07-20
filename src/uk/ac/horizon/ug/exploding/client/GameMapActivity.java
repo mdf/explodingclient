@@ -64,6 +64,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -94,7 +95,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	private static Member currentMember;
 	private MapView mapView;
 	
-	static enum DialogId { PLACE, PLACE_TO_SERVER, CARRY, CARRY_TO_SERVER };
+	static enum DialogId { PLACE, PLACE_TO_SERVER, CARRY, CARRY_TO_SERVER /*, NEW_CONTENT*/ };
 	private ActivityLogger logger = new ActivityLogger(this);
 
 	public static String LOGTYPE_GAME_ACTION = "GameAction";
@@ -345,25 +346,81 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			return;
 		Log.d(TAG,"Messages: "+messages.size());
 		
+		playAudio();
+		
+		Message bestContentMessage = null;
 		for (Object m : messages) {
 			Message message = (Message)m;
 			Log.d(TAG, "Message: "+m);
 			//NotificationUtils.postMessage(this, message);
 			clientState.getCache().removeFactSilent(message);
-			// BEGIN ROBIN
-			//if (message.getType())...??
-			logState("newMessage", "message", message.toString());
+			// TODO add global content type
+			if (uk.ac.horizon.ug.exploding.client.model.Message.MSG_TIMELINE_CONTENT.equals(message.getType()) ||
+					uk.ac.horizon.ug.exploding.client.model.Message.MSG_TIMELINE_CONTENT_GLOBAL.equals(message.getType())) {
+				// Pick one...
+				if (bestContentMessage==null)
+					bestContentMessage = message;
+				else if (uk.ac.horizon.ug.exploding.client.model.Message.MSG_TIMELINE_CONTENT_GLOBAL.equals(message.getType()))
+					// global event > non-global
+					bestContentMessage = message;
+						
+			}
+			else {
+				logState("newMessage.context", "message", message.toString());
+
+				if (message.getTitle()!=null) {
+					// context message -> toast
+					Toast.makeText(this, message.getTitle(), Toast.LENGTH_LONG).show();
+				}
+				else
+					Log.e(TAG,"Ignoring context message with no title: "+message);
+			}
+		}
+		if (bestContentMessage!=null) {
+			currentMessage = bestContentMessage;
+			logState("newMessage", "message", currentMessage.toString());
+			Log.d(TAG,"show NEW_CONTENT dialog for "+currentMessage);
+			//showDialog(DialogId.NEW_CONTENT.ordinal());
+			
 			Intent myIntent = new Intent();
-			myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.TimeEventDialog");
-			if (message.getYear()!=null)
-				myIntent.putExtra("year", message.getYear());
-			if (message.getTitle()!=null)
-				myIntent.putExtra("name", message.getTitle());
-			if (message.getDescription()!=null)
-				myIntent.putExtra("desc", message.getDescription());
-			playAudio();
+			myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.TimeEventSmallDialog");
+			if (currentMessage.getYear()!=null)
+				myIntent.putExtra("year", currentMessage.getYear());
+			if (currentMessage.getTitle()!=null)
+				myIntent.putExtra("name", currentMessage.getTitle());
+			if (currentMessage.getDescription()!=null)
+				myIntent.putExtra("desc", currentMessage.getDescription());
+
 			startActivity(myIntent);
-			// END ROBIN
+
+//			Dialog dialog = getNewContentDialog();
+//			if (currentMessage!=null && currentMessage.getTitle()!=null) {
+//				Log.d(TAG,"Prepare NEW_CONTENT dialog with title "+currentMessage.getTitle());
+//				dialog.setTitle(currentMessage.getTitle());
+//			}
+//			else {
+//				Log.e(TAG,"prepare new content dialog with no current message title");
+//				dialog.setTitle("Something's happening...");
+//			}
+//			dialog.show();
+//			
+//			if (newContentTimer!=null)
+//				newContentTimer.cancel();
+//			newContentTimer = new CountDownTimer(NEW_CONTENT_TIME_MS, NEW_CONTENT_TIME_MS) {
+//				@Override
+//				public void onTick(long millisUntilFinished) {
+//				}
+//				@Override
+//				public void onFinish() {
+//					if (newContentDialog!=null && newContentDialog.isShowing()) {
+//						Log.d(TAG,"Timeout dismiss new content dialog");
+//						//dismissDialog(DialogId.NEW_CONTENT.ordinal());
+//						if (newContentDialog!=null && newContentDialog.isShowing())
+//							newContentDialog.hide();
+//					}
+//				}
+//			};
+//			newContentTimer.start();
 		}
 	}
 	// BEGIN ROBIN
@@ -740,9 +797,92 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			});
 			return creatingPd;
 		}
+//		if (id==DialogId.NEW_CONTENT.ordinal()) {
+//			return getNewContentDialog();
+//			
+//		}
 		return super.onCreateDialog(id);
 	}
 	
+// See TimeEventSmallDialog
+//
+//	private Dialog getNewContentDialog() {
+//		final Dialog dialog = new Dialog(this);
+//		dialog.setContentView(R.layout.new_content_dialog);
+//		dialog.setCancelable(true);
+//		dialog.setTitle("{Message...}");
+//		dialog.setOnCancelListener(new OnCancelListener()  {				
+//			@Override
+//			public void onCancel(DialogInterface dialog) {
+//				//dismissDialog(DialogId.NEW_CONTENT.ordinal());
+//				dialog.dismiss();
+//			}
+//		});
+//		Button ok = (Button)dialog.findViewById(R.id.new_content_dialog_ok_button);
+//		ok.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View v) {					
+//				//dismissDialog(DialogId.NEW_CONTENT.ordinal());
+//				dialog.dismiss();
+//				showNewEvent();
+//			}
+//		});
+//		Button cancel = (Button)dialog.findViewById(R.id.new_content_dialog_cancel_button);
+//		cancel.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View arg0) {
+//				dialog.cancel();
+//			}
+//			
+//		});
+//		newContentDialog = dialog;
+//		return dialog;
+//	}
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onPrepareDialog(int, android.app.Dialog)
+	 */
+	@Override
+	protected void onPrepareDialog(int id, Dialog dialog) {
+//		if (id==DialogId.NEW_CONTENT.ordinal()) {
+//			// fix title
+//			if (currentMessage!=null && currentMessage.getTitle()!=null) {
+//				Log.d(TAG,"Prepare NEW_CONTENT dialog with title "+currentMessage.getTitle());
+//				dialog.setTitle(currentMessage.getTitle());
+//			}
+//			else {
+//				Log.e(TAG,"prepare new content dialog with no current message title");
+//				dialog.setTitle("Something's happening...");
+//			}
+//		}
+		super.onPrepareDialog(id, dialog);
+	}
+	/** message to show if the user asks for details... */
+	private Message currentMessage;
+//	private Dialog newContentDialog;
+//	private CountDownTimer newContentTimer;
+	protected void showNewEvent() {
+		if (currentMessage==null) {
+			Log.e(TAG,"showNewEvent(null)");
+			return;
+		}
+		// BEGIN ROBIN
+		//if (message.getType())...??
+//		logState("newMessage", "message", currentMessage.toString());
+		Log.d(TAG,"showNewEvent("+currentMessage+")");
+		logAction("showMessage", "message", currentMessage.toString());
+		Intent myIntent = new Intent();
+		myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.TimeEventDialog");
+		if (currentMessage.getYear()!=null)
+			myIntent.putExtra("year", currentMessage.getYear());
+		if (currentMessage.getTitle()!=null)
+			myIntent.putExtra("name", currentMessage.getTitle());
+		if (currentMessage.getDescription()!=null)
+			myIntent.putExtra("desc", currentMessage.getDescription());
+
+		startActivity(myIntent);
+		// END ROBIN
+
+	}
 	/**
 	 * 
 	 */

@@ -21,6 +21,8 @@ public class Message
   public static final java.lang.String MSG_TIMELINE_YEAR = "timeline_year";
   /** constant -  */
   public static final java.lang.String MSG_TIMELINE_CONTENT = "timeline_content";
+  /** constant -  */
+  public static final java.lang.String MSG_TIMELINE_CONTENT_GLOBAL = "timeline_content_global";
   /** no-arg cons */
   public Message()
   {
