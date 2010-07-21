@@ -72,6 +72,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.animation.BounceInterpolator;
@@ -135,6 +136,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		logger.logOnCreate(this, savedInstanceState);
+    	this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		try {
 			Log.d(TAG, "Try to load map view");
 			setContentView(R.layout.map);

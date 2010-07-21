@@ -29,8 +29,8 @@
 			android:label="@string/app_name" 
 			android:theme="@android:style/Theme.NoTitleBar" android:screenOrientation="portrait"/>	
 		<activity android:name="com.littlebighead.exploding.CommunityView" 
-			android:label="@string/app_name" 
-			android:theme="@android:style/Theme.NoTitleBar" android:screenOrientation="portrait"/>	
+			android:label="Community" 
+			android:screenOrientation="portrait"/>	
 		<activity android:name="com.littlebighead.exploding.TimeEventDialog" 
 			android:label="@string/app_name" 
 			android:theme="@android:style/Theme.NoTitleBar" android:screenOrientation="portrait"/>	
