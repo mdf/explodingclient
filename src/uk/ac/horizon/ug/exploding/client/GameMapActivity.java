@@ -638,7 +638,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				}				
 				int pos = itemOverlay.indexOf(currentMember);
 				if (pos>=0) {
-					itemOverlay.setFocus(itemOverlay.getItem(pos));
+					//itemOverlay.setFocus(itemOverlay.getItem(pos));
 					Log.d(TAG,"Set focus to item "+pos);
 				}
 				else
