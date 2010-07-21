@@ -239,7 +239,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 
 		}
 		catch (Exception e) {
-			Log.e(TAG, "Error loading map view: "+e);
+			Log.e(TAG, "Error loading map view", e);
 		}
 		Set<String> types = new HashSet<String>();
 		types.add(Message.class.getName());
@@ -1141,6 +1141,16 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		if (newFocus instanceof MyMapItem) {
 			MyMapItem mmi = (MyMapItem)newFocus;
 			Log.d(TAG,"Focus changed to "+mmi.getMember().getID());
+			Player player = getPlayer();
+			if (player==null) {
+				Log.e(TAG,"onFocusChanged player=null");
+				return;
+			}
+			if (!mmi.getMember().getPlayerID().equals(player.getID()))
+			{
+				Log.d(TAG,"Ignore other's member "+mmi.getMember().getID());
+				return;
+			}
 			logState("focusChanged", "memberID", mmi.getMember().getID());
 
 			currentMember = mmi.getMember();

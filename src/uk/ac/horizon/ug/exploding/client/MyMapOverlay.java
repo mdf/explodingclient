@@ -74,12 +74,14 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 				members = null;
 			else {
  				player = (Player)ps.get(0);
-			
+
+ 				// clone list
  				List<Object> allMembers = clientState.getCache().getFacts(Member.class.getName());
  				members = new LinkedList<Object>();
  				for (Object m : allMembers) {
  					Member member = (Member)m;
- 					if (player.getID().equals(member.getPlayerID()) && !member.getCarried())
+ 					if (!member.getCarried())	
+ 						//player.getID().equals(member.getPlayerID()) && 
  						members.add(member);
  				}
 			}
