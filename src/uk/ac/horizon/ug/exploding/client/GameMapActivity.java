@@ -428,6 +428,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			if (currentMessage.getTitle() != null){
 				textview.setText(currentMessage.getTitle() + " [more..]");
 				textview.setVisibility(TextView.VISIBLE);
+				textview.invalidate();
 			}
 		
 			//}
