@@ -624,6 +624,7 @@ public class BackgroundThread implements Runnable {
 			case ERROR_IN_SERVER_URL:
 			case CANCELLED_BY_USER:
 			case ERROR_AFTER_STATE:
+			case STOPPED:
 				Log.i(TAG, "Retry from "+currentClientState.getClientStatus()+" to NEW");
 				restart(context);
 				break;

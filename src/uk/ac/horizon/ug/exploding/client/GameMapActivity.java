@@ -65,6 +65,7 @@ import android.location.LocationListener;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -244,8 +245,13 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			checkYear(clientState);
 		if (isInitial || clientState.getChangedTypes().contains(Member.class.getName()))
 			updateMembers(clientState);
-		if (isInitial || clientState.getChangedTypes().contains(Player.class.getName()))
+		if (isInitial || clientState.getChangedTypes().contains(Player.class.getName()) || clientState.getChangedTypes().contains(Game.class.getName()))
 			updateButtons(clientState);
+		if (gameEnded()) {
+			logState("gameEnded");
+			Toast.makeText(this, "The game is over!", Toast.LENGTH_LONG).show();
+			finish();
+		}
 	}
 
 	/**
@@ -257,13 +263,14 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			return;
 		Player player = (Player)cache.getFirstFact(Player.class.getName());
 		Button button;
+		boolean active = gameActive();
 		button = (Button)findViewById(R.id.map_story_button);
-		button.setEnabled(canAuthor(false));
+		button.setEnabled(active && canAuthor(false));
 		button = (Button)findViewById(R.id.map_create_button);
-		button.setEnabled(canCreateMember(false));
+		button.setEnabled(active && canCreateMember(false));
 		button = (Button)findViewById(R.id.map_community_button);
 		// dis/enable communities
-		button.setEnabled(cache.getFirstFact(Member.class.getName())!=null);
+		button.setEnabled(active && cache.getFirstFact(Member.class.getName())!=null);
 	}
 	/**
 	 * @param clientState
@@ -583,6 +590,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	@Override
 	protected void onPause() {
 		logger.logOnPause();
+		stopNagging();
 		// TODO Auto-generated method stub
 		//LocationUtils.unregisterOnThread(this, this, null);
 		myLocationOverlay.disableCompass();
@@ -598,6 +606,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		logger.logOnResume();
 		// TODO Auto-generated method stub
 		super.onResume();
+		startNagging();
 		myLocationOverlay.enableCompass();
 		myLocationOverlay.enableMyLocation();
 		//		LocationUtils.registerOnThread(this, this, null);
@@ -632,6 +641,11 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			Log.e(TAG,"askToPlace called with null/uncarried member: "+currentMember);
 			return;
 		}
+		if (!gameActive())
+		{
+			Log.e(TAG,"askToPlace ignored for inactive game");
+			return;
+		}
 		try {
 			ClientState cs = BackgroundThread.getClientState(this);
 			placeLocation = LocationUtils.getCurrentLocation(this);
@@ -664,6 +678,8 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			return false;
 		ClientState cs = BackgroundThread.getClientState(this);
 		if (cs==null)
+			return false;
+		if (!gameActive())
 			return false;
 		if (LocationUtils.getCurrentLocation(this)==null)
 			return false;
@@ -742,6 +758,64 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 
 	public static void setCurrentMember(Member currentMember) {
 		GameMapActivity.currentMember = currentMember;
+	}
+	private Handler mHandler = new Handler();
+	
+	/** game ending */
+	private boolean gameActive() {
+		ClientState cs = BackgroundThread.getClientState(this);
+		if (cs==null) {
+			Log.e(TAG,"gameActive() null ClientState");
+			return true;
+		}
+		return cs.getGameStatus()==GameStatus.ACTIVE;
+	}
+	/** game ending */
+	private boolean gameEnded() {
+		ClientState cs = BackgroundThread.getClientState(this);
+		if (cs==null) {
+			Log.e(TAG,"gameEnded() null ClientState");
+			return true;
+		}
+		return cs.getGameStatus()==GameStatus.ENDED;
+	}
+
+	private static int NAG_INTERVAL_MS = 15000;
+	private static int NAG_VIBRATE_MS = 500;
+	private static String END_GAME_MESSAGE = "Please return to the Tramshed as quickly as possible.";
+	private static String OUTSIDE_PLAYAREA_MESSAGE = "You have left the game area; please go back towards the Tramshed.";
+	private Runnable nagTimerTask = new Runnable() {
+		@Override
+		public void run() {
+			boolean vibrate = false;
+			if (!gameActive()) {
+				logState("nag gameEnding");
+				Toast.makeText(GameMapActivity.this, END_GAME_MESSAGE, Toast.LENGTH_LONG).show();
+				vibrate = true;
+			}
+			else {
+				Location loc = LocationUtils.getCurrentLocation(GameMapActivity.this);
+				if (loc!=null && ZoneService.outsideGameArea(GameMapActivity.this, loc.getLatitude(), loc.getLongitude())) {
+					logState("nag outOfGameZone");
+					Toast.makeText(GameMapActivity.this, OUTSIDE_PLAYAREA_MESSAGE, Toast.LENGTH_LONG).show();
+					vibrate = true;
+				}
+			}
+			if (vibrate) {
+				Vibrator vibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
+				if (vibrator!=null)
+					vibrator.vibrate(NAG_VIBRATE_MS);
+			}
+			mHandler.postDelayed(this, NAG_INTERVAL_MS);
+		}
+	};
+	private static int NAG_DELAY_MS = 2000;
+	private void startNagging() {
+		mHandler.removeCallbacks(nagTimerTask);
+		mHandler.postDelayed(nagTimerTask, NAG_DELAY_MS);
+	}
+	private void stopNagging() {
+		mHandler.removeCallbacks(nagTimerTask);		
 	}
 
 	@Override

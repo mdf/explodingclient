@@ -25,7 +25,7 @@ package com.littlebighead.exploding;
  */
 public enum PlayerColours {
 
-	Yellow(0xffFCC00), 
+	Yellow(0xffFFCC00), 
 	Pink(0xffE11588), //?
 	Orange(0xffF96432), 	
 	OliveGreen(0xff949431),  

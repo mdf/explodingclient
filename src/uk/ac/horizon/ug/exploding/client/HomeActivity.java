@@ -360,14 +360,17 @@ public class HomeActivity extends LoggingActivity implements ClientStateListener
 		case POLLING:
 		case IDLE:
 		case PAUSED:
-			if (clientState.getGameStatus()!=null && clientState.getGameStatus()!=GameStatus.NOT_STARTED)
+			if (clientState.getGameStatus()!=null && clientState.getGameStatus()!=GameStatus.NOT_STARTED) {
 				enablePlay = true;
-			else
+				enableRetry = false;
+			}
+			else {
 				enablePlay = false;
-			enableRetry = false;
+				enableRetry = true;
+			}
 			break;
 		default:
-			enableRetry = false;
+			enableRetry = true;
 			enablePlay = false;
 			break;
 		}

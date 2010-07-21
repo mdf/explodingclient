@@ -316,12 +316,13 @@ public class Client {
 	/** send queued messages */
 	public void sendQueuedMessages() {
 		while(true) {
+			QueuedMessage qm = null;
 			synchronized (queuedMessages) {
 				if (queuedMessages.isEmpty())
 					return;
-				QueuedMessage qm = queuedMessages.removeFirst();
-				sendQueuedMessage(qm);
+				qm = queuedMessages.removeFirst();
 			}
+			sendQueuedMessage(qm);
 		}	
 	}
 	private void sendQueuedMessage(QueuedMessage qm) {
@@ -669,6 +670,10 @@ public class Client {
 		}
 		if (o instanceof Zone) {
 			Zone p = (Zone)o;
+			return p.getID();
+		}
+		if (o instanceof Game) {
+			Game p = (Game)o;
 			return p.getID();
 		}
 		Log.d(TAG,"getFactID for unknown class "+o.getClass().getName());
