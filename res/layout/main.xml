@@ -16,10 +16,9 @@
 <!--  BEGIN from Robin res/layout/start.xml -->
 <ImageView
 android:id="@+id/start_img"
-android:layout_width="fill_parent"
 android:layout_height="wrap_content"
 android:src="@drawable/start_screen2" android:layout_y="0px" android:layout_x="0px" 
-android:paddingBottom="20px" android:scaleType="fitCenter">
+android:paddingBottom="20px" android:scaleType="fitCenter" android:layout_width="fill_parent" android:minHeight="650px">
 </ImageView>
 <!--  END from Robin res/layout/start.xml -->
 

@@ -73,6 +73,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.animation.BounceInterpolator;
@@ -136,6 +137,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		logger.logOnCreate(this, savedInstanceState);
+    	this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		try {
 			Log.d(TAG, "Try to load map view");
 			setContentView(R.layout.map);
@@ -186,6 +188,26 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 
 
 			// END Robin's code
+			TextView textview = (TextView)findViewById(R.id.ContentTextView);
+			textview.setOnClickListener(new OnClickListener(){
+					public void onClick(View v){
+						if (currentMessage!=null) {
+							Intent myIntent = new Intent();
+							myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.TimeEventDialog");
+
+							if (currentMessage.getYear()!=null)
+								myIntent.putExtra("year", currentMessage.getYear());
+							if (currentMessage.getTitle()!=null)
+								myIntent.putExtra("name", currentMessage.getTitle());
+							if (currentMessage.getDescription()!=null)
+								myIntent.putExtra("desc", currentMessage.getDescription());
+
+							startActivity(myIntent);
+						}
+					}
+				});
+
+			
 			mapView.setBuiltInZoomControls(true);
 			myLocationOverlay = new MyLocationOverlay(this, mapView);
 			myLocationOverlay.runOnFirstFix(new Runnable() {
@@ -397,40 +419,26 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			//showDialog(DialogId.NEW_CONTENT.ordinal());
 
 			TextView textview = (TextView)findViewById(R.id.ContentTextView);
-			if (currentMessage != null){
-
+			//if (currentMessage != null){
+				
+			if (currentMessage.getTitle() != null){
 				textview.setText(currentMessage.getTitle() + " [more..]");
 				textview.setVisibility(TextView.VISIBLE);
-				textview.setOnClickListener(new OnClickListener(){
-					public void onClick(View v){
-						
-						Intent myIntent = new Intent();
-						myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.TimeEventDialog");
-						
-						if (currentMessage.getYear()!=null)
-							myIntent.putExtra("year", currentMessage.getYear());
-						if (currentMessage.getTitle()!=null)
-							myIntent.putExtra("name", currentMessage.getTitle());
-						if (currentMessage.getDescription()!=null)
-							myIntent.putExtra("desc", currentMessage.getDescription());
-
-						startActivity(myIntent);
-
-					}
-				});
-
 			}
-			//Intent myIntent = new Intent();
-			//myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.TimeEventSmallDialog");
-			//if (currentMessage.getYear()!=null)
-			//	myIntent.putExtra("year", currentMessage.getYear());
-			//if (currentMessage.getTitle()!=null)
-			//	myIntent.putExtra("name", currentMessage.getTitle());
-			//if (currentMessage.getDescription()!=null)
-			//	myIntent.putExtra("desc", currentMessage.getDescription());
+		
+			//}
+			
+			/*Intent myIntent = new Intent();
+			myIntent.setClassName("uk.ac.horizon.ug.exploding.client", "com.littlebighead.exploding.TimeEventSmallDialog");
+			if (currentMessage.getYear()!=null)
+				myIntent.putExtra("year", currentMessage.getYear());
+				if (currentMessage.getTitle()!=null)
+					myIntent.putExtra("name", currentMessage.getTitle());
+				if (currentMessage.getDescription()!=null)
+					myIntent.putExtra("desc", currentMessage.getDescription());
 
-			//startActivity(myIntent);
-
+			startActivity(myIntent);*/
+			
 			//			Dialog dialog = getNewContentDialog();
 			//			if (currentMessage!=null && currentMessage.getTitle()!=null) {
 			//				Log.d(TAG,"Prepare NEW_CONTENT dialog with title "+currentMessage.getTitle());
