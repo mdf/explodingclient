@@ -27,7 +27,8 @@ class MyMapItem extends OverlayItem {
 	public Drawable getMarker(int stateBitset) {
 		// TODO Auto-generated method stub
 		//Log.d(TAG,"getmarker("+stateBitset+"), "+((stateBitset & OverlayItem.ITEM_STATE_FOCUSED_MASK)!=0 ? "selected" : "unselected"));
-		this.mMarker.setState((stateBitset & OverlayItem.ITEM_STATE_FOCUSED_MASK)!=0 ? selected : unselected);
+		//this.mMarker.setState((stateBitset & OverlayItem.ITEM_STATE_FOCUSED_MASK)!=0 ? selected : unselected);
+		this.mMarker.setState(unselected);
 		return this.mMarker;
 		//return super.getMarker(stateBitset);
 	}

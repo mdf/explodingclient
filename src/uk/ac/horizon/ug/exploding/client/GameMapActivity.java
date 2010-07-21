@@ -21,8 +21,10 @@
 package uk.ac.horizon.ug.exploding.client;
 
 import com.littlebighead.exploding.Body;
+import com.littlebighead.exploding.CommunityPropsDialog;
 import com.littlebighead.exploding.CommunityView;
 import com.littlebighead.exploding.Limb;
+import com.littlebighead.exploding.CommunityPropsDialog.ReadyListener;
 
 import java.util.HashSet;
 import java.util.List;
@@ -98,6 +100,8 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	private MapView mapView;
 
 	static enum DialogId { PLACE, PLACE_TO_SERVER, CARRY, CARRY_TO_SERVER /*, NEW_CONTENT*/ };
+	private ProgressDialog placeToServerPd;
+	private ProgressDialog carryToServerPd;
 	private ActivityLogger logger = new ActivityLogger(this);
 
 	public static String LOGTYPE_GAME_ACTION = "GameAction";
@@ -874,6 +878,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 					placedMember = null;
 				}
 			});
+			placeToServerPd = creatingPd;
 			return creatingPd;
 		}
 		if (id==DialogId.CARRY.ordinal()) {
@@ -922,6 +927,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 					placedMember = null;
 				}
 			});
+			carryToServerPd = creatingPd;
 			return creatingPd;
 		}
 		//		if (id==DialogId.NEW_CONTENT.ordinal()) {
@@ -1098,10 +1104,10 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	public void onMessageResponse(MessageStatusType status,
 			String errorMessage, Object value) {
 		Log.d(TAG,"onMessageResponse: status="+status+", error="+errorMessage+", value="+value);
-		if (currentMember!=null && currentMember.getCarried())
-			dismissDialog(DialogId.PLACE_TO_SERVER.ordinal());
-		else
+		if (carryToServerPd!=null && carryToServerPd.isShowing())
 			dismissDialog(DialogId.CARRY_TO_SERVER.ordinal());
+		if (placeToServerPd!=null && placeToServerPd.isShowing())
+			dismissDialog(DialogId.PLACE_TO_SERVER.ordinal());
 
 		if (status==MessageStatusType.OK) {
 			logAction("carry/placeMember.ok");
@@ -1137,8 +1143,16 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			logState("focusChanged", "memberID", mmi.getMember().getID());
 
 			currentMember = mmi.getMember();
+
+			CommunityPropsDialog myDialog = new CommunityPropsDialog(this, currentMember, new ReadyListener() {
+				@Override
+				public void ready(String name) {
+				}				
+			});
+	        myDialog.show();
+			
 			//updateAttributes(mmi.getMember());
-			checkCarry();
+			//checkCarry();
 		}
 		else {
 			//updateAttributes(null);
