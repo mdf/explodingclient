@@ -40,10 +40,16 @@
   <!--  cmg           03n3fWJh9uBTZBBsJ6AfpbuPbFE8rdl745MCy4w -->
   <!--  ROBIN         0DCXfmwsB5lNl4mg3T70vftbT6J5ZLaQFBXB15g -->	
   <!--  tom			  0-oOTjjhHTq0hnGzZdOFPUAe8Cj5imH0c0QMqZw-->
-  	<TextView android:layout_width="wrap_content" android:width="320px" android:visibility="invisible" android:layout_height="wrap_content" android:text="" android:textStyle="bold" android:typeface="serif" android:layout_y="5px" android:id="@+id/ContentTextView" android:textSize="15dip" android:layout_x="20px" android:textColor="#ffffff" android:background="#3f000000" android:padding="10px">
+
+  	<TextView android:layout_width="wrap_content" android:width="320px" android:visibility="invisible" android:layout_height="wrap_content" android:text="" android:textStyle="bold" android:typeface="serif" android:layout_y="5px" android:id="@+id/ContentTextView" android:textSize="15dip" android:layout_x="20px" android:textColor="#ffffff" android:background="#7f000000" android:padding="10px">
 	</TextView>
 <!--<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1900" android:textStyle="bold" android:typeface="serif" android:layout_y="5px" android:id="@+id/YearTextView" android:textSize="30dip" android:layout_x="350px" android:textColor="#ffffff" android:background="#ff000000" android:padding="10px"> -->
 	<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold" android:typeface="serif" android:layout_y="5px" android:id="@+id/YearTextView" android:textSize="30dip" android:textColor="#ffffff" android:padding="5px" android:layout_x="365px" android:text="1890" android:background="#3f000000">
+<!--  
+  	<TextView android:layout_width="wrap_content" android:width="320px" android:layout_height="wrap_content" android:text="" android:textStyle="bold" android:typeface="serif" android:layout_y="5px" android:id="@+id/ContentTextView" android:textSize="15dip" android:layout_x="20px" android:textColor="#ffffff" android:background="#ff000000" android:padding="10px">
+	</TextView>
+	<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1900" android:textStyle="bold" android:typeface="serif" android:layout_y="5px" android:id="@+id/YearTextView" android:textSize="30dip" android:layout_x="350px" android:textColor="#ffffff" android:background="#3f0000" android:padding="10px">
+-->
 	</TextView>
 	<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold" android:typeface="serif" android:textColor="#ffffff" android:background="#ff000000" android:text="You are in: -" android:layout_x="0px" android:textSize="20dip" android:id="@+id/ZoneTextView" android:paddingLeft="10px" android:layout_y="625px">
 	</TextView>
