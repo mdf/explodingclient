@@ -28,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
 import android.util.Log;
+import android.view.Gravity;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
@@ -35,6 +36,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -217,6 +219,8 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
         nameEditText.setPadding(5, 5, 5, 5);
         mainLayout.addView(nameEditText);
         
+        
+        
         // begin cmg
         Button buttons[] = new Button[4];
         // end cmg
@@ -229,22 +233,27 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
         	Button button = new Button(this);
         	if (f<buttons.length)
         		buttons[f] = button;
-        	button.setText("-");
         	button.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT,1));
+        	button.setTextSize(20);
         	switch(f) {
         		case 0:
         			button.setBackgroundColor(0xff00aeef);
+                	button.setText("H");
         			break;
         		case 1:
         			button.setBackgroundColor(0xffFFCC00);
+                	button.setText("W");
         			break;
         		case 2:
         			button.setBackgroundColor(0xffFF6633);
+                	button.setText("Kn");
         			break;
         		case 3:
         			button.setBackgroundColor(0xff999933);
+                	button.setText("P");
         			break;
         		default:
+        			button.setTextSize(15);
             		button.setText("Done");
 //                	button.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT,2));
             		button.setOnClickListener(new OnClickListener() {
@@ -271,11 +280,61 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
         	
         }
         
+        
+        RelativeLayout drawLayout = new RelativeLayout(this);
+        mainLayout.addView(drawLayout);
+        drawLayout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,600));
+
         drawView = new DrawView(this, getPlayerColor(), buttons);
         drawView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, 600));
-        mainLayout.addView(drawView);
+        //mainLayout.addView(drawView);
+        drawLayout.addView(drawView);
         drawView.requestFocus();
         mainLayout.addView(buttonLayout);
+
+        
+        LinearLayout sizeButtons = new LinearLayout(this);
+        sizeButtons.setOrientation(LinearLayout.HORIZONTAL);
+        sizeButtons.setGravity(Gravity.LEFT);
+        sizeButtons.setLayoutParams(new RelativeLayout.LayoutParams(200,100));
+        drawLayout.addView(sizeButtons);
+        
+        Button sizeUp = new Button(this);
+        sizeUp.setText("+");
+        sizeUp.setTextSize(20);
+        sizeUp.setLayoutParams(new LinearLayout.LayoutParams(60,60));
+        sizeUp.setOnClickListener(new OnClickListener() {
+		    public void onClick(View v) {
+		    	if (Limb.prev != null) {
+		    		Limb.prev.xradius += 5;
+		    		Limb.prev.yradius += 5;
+		    		if (Limb.prev.xradius > 100) Limb.prev.xradius = 100;
+		    		if (Limb.prev.yradius > 100) Limb.prev.yradius = 100;
+		    		drawView.invalidate();
+		    	}
+			}
+
+		});
+        sizeButtons.addView(sizeUp);
+        
+        Button sizeDown = new Button(this);
+        sizeDown.setText("-");
+        sizeDown.setTextSize(20);
+        sizeDown.setLayoutParams(new LinearLayout.LayoutParams(60,60));
+        sizeDown.setOnClickListener(new OnClickListener() {
+		    public void onClick(View v) {
+		    	if (Limb.prev != null) {
+		    		Limb.prev.xradius -= 5;
+		    		Limb.prev.yradius -= 5;
+		    		if (Limb.prev.xradius < 10) Limb.prev.xradius = 10;
+		    		if (Limb.prev.yradius < 10) Limb.prev.yradius = 10;
+		    		drawView.invalidate();
+		    	}
+			}
+		});
+        sizeButtons.addView(sizeDown);
+
+        
                 
         setContentView(mainLayout);
 /*        
