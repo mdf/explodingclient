@@ -43,7 +43,8 @@ public class DrawView extends View implements OnTouchListener {
         paint.setAntiAlias(true);
  
         body = new Body(color);
-
+        Limb.curr = Limb.prev = null;
+        
         updateButtons();
     }
 
