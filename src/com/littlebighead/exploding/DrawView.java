@@ -103,9 +103,11 @@ public class DrawView extends View implements OnTouchListener {
         		break;
         		
         	case MotionEvent.ACTION_UP:
-        		Limb.prev = Limb.curr;
-        		Limb.curr = null;
-        		invalidate();
+        		if (Limb.curr!=null) {
+        			Limb.prev = Limb.curr;
+        			Limb.curr = null;
+        		}
+    			invalidate();
         		break;
         }
         		
@@ -126,10 +128,11 @@ public class DrawView extends View implements OnTouchListener {
     	return true;    	
     }
 
+    private static String buttonLabel [] = new String[] { "H\n", "W\n", "K\n", "P\n" };
     private void updateButtons() {
     	int attribs[] = body.getAttributes();
     	for (int i=0; i<attribs.length && i<buttons.length; i++)
-    		buttons[i].setText(""+attribs[i]);
+    		buttons[i].setText(buttonLabel[i % buttonLabel.length]+attribs[i]);
     }
 
 }

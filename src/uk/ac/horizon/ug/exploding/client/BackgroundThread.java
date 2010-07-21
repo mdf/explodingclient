@@ -380,7 +380,8 @@ public class BackgroundThread implements Runnable {
 			setClientStatus(ClientStatus.IDLE, "Ready to play");			
 		}
 		catch (Exception e) {
-			Log.e(TAG, "Doing (later) poll", e);
+			Log.e(TAG, "Doi" +
+					"ng (later) poll", e);
 			setClientStatus(ClientStatus.ERROR_AFTER_STATE, "Could not get updates\n("+e.getMessage()+")");
 			return;						
 		}
@@ -413,6 +414,8 @@ public class BackgroundThread implements Runnable {
 			{
 				setClientStatus(ClientStatus.POLLING, "Trying to send queued updates");	
 				client.sendQueuedMessages();
+				// force rapid poll?!
+				client.poll();
 				// success = good
 				setClientStatus(ClientStatus.IDLE, "Ready to play");			
 			}

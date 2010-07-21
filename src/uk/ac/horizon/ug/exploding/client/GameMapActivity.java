@@ -750,7 +750,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				//        		  Log.i("limb position", Double.toString(limb.x));
 				//       	  }
 				// can't place immediately for now so push to community with a message
-				Toast.makeText(this, "Your new community member will appear in a moment", Toast.LENGTH_LONG).show();
+				//Toast.makeText(this, "Your new community member will appear in a moment", Toast.LENGTH_SHORT).show();
 
 				setCurrentMember(null);
 				Intent myIntent = new Intent();

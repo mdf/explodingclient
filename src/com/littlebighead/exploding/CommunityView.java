@@ -1,6 +1,7 @@
 package com.littlebighead.exploding;
 
 
+import java.util.Collections;
 import java.util.LinkedList;
 
 import java.util.List;
@@ -243,8 +244,25 @@ public class CommunityView extends LoggingActivity implements ClientStateListene
 				}
 			}
 		}
+		Collections.sort(members, new MemberComparator());
 		return members;
     }
+    static class MemberComparator implements java.util.Comparator<Member> {
+
+		/* (non-Javadoc)
+		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+		 */
+		@Override
+		public int compare(Member m1, Member m2) {
+			if (m1.getID()==null)
+				return -1;
+			if (m2.getID()==null)
+				return 1;
+			return m1.getID().compareTo(m2.getID());
+		}
+    	
+    }
+    
 	/* (non-Javadoc)
 	 * @see uk.ac.horizon.ug.exploding.client.ClientStateListener#clientStateChanged(uk.ac.horizon.ug.exploding.client.ClientState)
 	 */

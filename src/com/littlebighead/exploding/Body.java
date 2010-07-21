@@ -187,9 +187,10 @@ public class Body {
 
     }
     /** total points to share out */
-    static final int TOTAL_POINTS = 24;
+    static final int TOTAL_POINTS = 20;
 
 	private static final String TAG = "Body";
+	private static final int MOD_DISTANCE = 50;
 	/** Attributes based on relative distance from centre
 	 * @author cmg
 	 * @return
@@ -199,15 +200,23 @@ public class Body {
 		float dist[] = new float[limbs.length-1];
 		for (int i=0; i<dist.length; i++) {
 			dist[i] = (float)Math.sqrt(limbs[i+1].x*limbs[i+1].x+limbs[i+1].y*limbs[i+1].y);
+			dist[i] = dist[i] - (float)(MOD_DISTANCE*Math.floor(dist[i]/MOD_DISTANCE));
 			total += dist[i];
 		}
 		int attributes[] = new int[limbs.length-1];
 		
 		for (int i=0; i<dist.length; i++) {
-			attributes[i] = (int)(1+(TOTAL_POINTS-dist.length)*dist[i]/total);
-			if (attributes[i] > 10)
-				attributes[i] = 10;
+			attributes[i] = (int)(TOTAL_POINTS*dist[i]/total);
+			if (attributes[i] > 7)
+				attributes[i] = 7;
 		}
+		
+		// health
+		if (attributes[0] < 2)
+			attributes[0] = 2;
+		if (attributes[0] > 5)
+			attributes[0] = 5;
+		
 		return attributes;
 	}
 	/** limb info as comma separated: x,y,w,h 

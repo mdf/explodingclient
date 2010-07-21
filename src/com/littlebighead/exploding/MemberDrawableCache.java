@@ -45,8 +45,8 @@ import android.util.Log;
  */
 public class MemberDrawableCache {
 	
-	private static final int WIDTH = 72;
-	private static final int HEIGHT = 72;
+	private static final int WIDTH = 100;
+	private static final int HEIGHT = 100;
 
 	/** get for Member */
 	public static synchronized Drawable getDrawable(Member member) {

@@ -86,14 +86,14 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
 		try {
 			Member member = new Member();
 
-			//SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-			//member.setName(preferences.getString(ExplodingPreferences.PLAYER_NAME, ""));
+			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+			member.setName(preferences.getString(ExplodingPreferences.PLAYER_NAME, ""));
 			
-			member.setName(nameEditText.getText().toString());
-			if (member.getName()==null || member.getName().length()==0) {
-				Toast.makeText(this, "Please give your community member a name", Toast.LENGTH_SHORT).show();
-				return;
-			}
+//			member.setName(nameEditText.getText().toString().replace('\n', ' ').trim());
+//			if (member.getName()==null || member.getName().length()==0) {
+//				Toast.makeText(this, "Please give your community member a name", Toast.LENGTH_SHORT).show();
+//				return;
+//			}
 
 //			EditText et = (EditText)findViewById(R.id.create_member_action_edit_text);
 //			member.setAction(Integer.parseInt(et.getText().toString()));
@@ -191,7 +191,7 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
 		}
 		return PlayerColours.values()[player.getColourRef() % PlayerColours.values().length].color();
 	}
-	private EditText nameEditText;
+	//private EditText nameEditText;
 	// END CMG
 	
     /** Called when the activity is first created. */
@@ -210,14 +210,14 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
         LinearLayout mainLayout = new LinearLayout(this);
         mainLayout.setOrientation(LinearLayout.VERTICAL);
         
-        TextView title = new TextView(this);
-        title.setText("Community Member's Name:");
-        mainLayout.addView(title);
+//        TextView title = new TextView(this);
+//        title.setText("Community Member's Name:");
+//        mainLayout.addView(title);
 
-        nameEditText = new EditText(this);
-        nameEditText.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
-        nameEditText.setPadding(5, 5, 5, 5);
-        mainLayout.addView(nameEditText);
+//        nameEditText = new EditText(this);
+//        nameEditText.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+//        nameEditText.setPadding(5, 5, 5, 5);
+//        mainLayout.addView(nameEditText);
         
         
         
@@ -302,7 +302,7 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
         Button sizeUp = new Button(this);
         sizeUp.setText("+");
         sizeUp.setTextSize(20);
-        sizeUp.setLayoutParams(new LinearLayout.LayoutParams(60,60));
+        sizeUp.setLayoutParams(new LinearLayout.LayoutParams(80,80));
         sizeUp.setOnClickListener(new OnClickListener() {
 		    public void onClick(View v) {
 		    	if (Limb.prev != null) {
@@ -320,7 +320,7 @@ public class CreateMemberView extends LoggingActivity implements ClientMessageLi
         Button sizeDown = new Button(this);
         sizeDown.setText("-");
         sizeDown.setTextSize(20);
-        sizeDown.setLayoutParams(new LinearLayout.LayoutParams(60,60));
+        sizeDown.setLayoutParams(new LinearLayout.LayoutParams(80,80));
         sizeDown.setOnClickListener(new OnClickListener() {
 		    public void onClick(View v) {
 		    	if (Limb.prev != null) {
