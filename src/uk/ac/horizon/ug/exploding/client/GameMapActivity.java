@@ -711,7 +711,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			return false;
 		return true;
 	}
-	private static double CARRY_DISTANCE_M = 20;
+	private static double CARRY_DISTANCE_M = 40;
 	//	@Override
 	//	public void onLocationChanged(Location location) {
 	//		// TODO Auto-generated method stub
