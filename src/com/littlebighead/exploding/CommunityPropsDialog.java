@@ -35,13 +35,22 @@ public class CommunityPropsDialog extends Dialog {
     private String name;
     private ReadyListener readyListener;
     TextView etName;
-
+    private boolean justFinishOnEnd;
+    
     public CommunityPropsDialog(Context context, Member member,
             ReadyListener readyListener) {
         super(context);
         this.name = member.getName();
         this.member = member;
         this.readyListener = readyListener;
+    }
+    public CommunityPropsDialog(Context context, Member member,
+            ReadyListener readyListener, boolean justFinishOnEnd) {
+        super(context);
+        this.name = member.getName();
+        this.member = member;
+        this.readyListener = readyListener;
+        this.justFinishOnEnd = justFinishOnEnd;
     }
 
     @Override
@@ -89,13 +98,15 @@ public class CommunityPropsDialog extends Dialog {
 	private class OKListener implements android.view.View.OnClickListener {
         @Override
         public void onClick(View v) {
-            readyListener.ready(String.valueOf(etName.getText()));
             GameMapActivity.setCurrentMember(member);
             CommunityPropsDialog.this.dismiss();
-            Intent intent = new Intent();
-            intent.setClass(CommunityPropsDialog.this.getContext(), GameMapActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            CommunityPropsDialog.this.getContext().startActivity(intent);
+            if (!justFinishOnEnd) {
+            	Intent intent = new Intent();
+            	intent.setClass(CommunityPropsDialog.this.getContext(), GameMapActivity.class);
+            	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            	CommunityPropsDialog.this.getContext().startActivity(intent);
+            }
+            readyListener.ready(String.valueOf(etName.getText()));
         }
     }
 

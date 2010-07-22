@@ -116,10 +116,10 @@ public class ZoneOverlay extends Overlay {
 				paint.setAlpha(BORDER_ALPHA);
 				canvas.drawPath(path, paint);
 				
-				Log.d(TAG,"Drew zone "+z+" (end point "+gp1+" -> "+point+")");
+//				Log.d(TAG,"Drew zone "+z+" (end point "+gp1+" -> "+point+")");
 			}
-			else
-				Log.d(TAG,"No point on zone "+z);
+//			else
+//				Log.d(TAG,"No point on zone "+z);
 			zi++;
 		}
 	}

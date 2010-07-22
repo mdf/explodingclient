@@ -92,12 +92,15 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 		this.members = members;
 		populate();		
 	}
+	private MyMapItem onTapItem = null;
 	@Override
 	protected synchronized boolean onTap(int index) {
 		Log.d(TAG,"onTap("+index+") -> focus");
 		setFocus(null);
-		if (index<size())
-			setFocus(getItem(index));
+		if (index<size()) {
+			onTapItem = getItem(index);
+			setFocus(onTapItem);
+		}
 		return true;
 		//return super.onTap(index);
 	}
@@ -127,6 +130,37 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 		}
 		// no more animation...
 		return false;
+	}
+	private MyMapItem hitMyAvatar = null;
+	/* (non-Javadoc)
+	 * @see com.google.android.maps.ItemizedOverlay#onTap(com.google.android.maps.GeoPoint, com.google.android.maps.MapView)
+	 */
+	@Override
+	public boolean onTap(GeoPoint p, MapView mapView) {
+		hitMyAvatar = null;
+		onTapItem = null;
+		boolean hit = super.onTap(p, mapView);
+		Log.d(TAG,"onTap: hitMyAvatar="+hitMyAvatar+", onTapItem="+onTapItem);
+		if (onTapItem==null && hitMyAvatar!=null) {
+			Log.d(TAG,"onTap: late hit my avatar");
+			onTap(indexOf(hitMyAvatar.getMember()));
+		}
+		return hit;
+	}
+	/* (non-Javadoc)
+	 * @see com.google.android.maps.ItemizedOverlay#hitTest(com.google.android.maps.OverlayItem, android.graphics.drawable.Drawable, int, int)
+	 */
+	@Override
+	protected boolean hitTest(MyMapItem item, Drawable marker, int hitX,
+			int hitY) {
+		boolean hit = super.hitTest(item, marker, hitX, hitY);
+		Member member = item.getMember();
+		if (hit && member!=null && member.getParentMemberID()==null) {
+			hitMyAvatar = item;
+			Log.d(TAG,"Suppress hitTest of myAvatar");
+			return false;
+		}
+		return hit;
 	}
 	
 }

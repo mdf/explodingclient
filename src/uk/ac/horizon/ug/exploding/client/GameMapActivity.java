@@ -604,14 +604,18 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	}
 
 	private void centreOnMyLocation() {
+		centreOnMyLocation(true);
+	}
+	private void centreOnMyLocation(boolean checkZoom) {
 		try {
 			Location loc = LocationUtils.getCurrentLocation(this);
 			if (loc!=null) {
-				centreOn(loc.getLatitude(), loc.getLongitude());
+				centreOn(loc.getLatitude(), loc.getLongitude(), checkZoom);
 			}
 			else
 			{
-				Toast.makeText(this, "Current location unknown", Toast.LENGTH_SHORT).show();
+				if (checkZoom)
+					Toast.makeText(this, "Current location unknown", Toast.LENGTH_SHORT).show();
 			}
 		}catch (Exception e) {
 			Log.e(TAG, "doing centreOnMyLocation", e);
@@ -623,12 +627,15 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	 * @param longitude
 	 */
 	private void centreOn(double latitude, double longitude) {
+		centreOn(latitude, longitude, true);
+	}
+	private void centreOn(double latitude, double longitude, boolean checkZoom) {
 		// TODO Auto-generated method stub
 		MapView mapView = (MapView)findViewById(R.id.map_view);
 		MapController controller = mapView.getController();
 		int zoomLevel = mapView.getZoomLevel();
 		// zoom Level 15 is about 1000m on a side
-		if (zoomLevel < MIN_ZOOM_LEVEL)
+		if (checkZoom && zoomLevel < MIN_ZOOM_LEVEL)
 			controller.setZoom(MIN_ZOOM_LEVEL);
 		GeoPoint point = new GeoPoint((int)(latitude*MILLION), (int)(longitude*MILLION));
 		controller.animateTo(point);		
@@ -733,18 +740,24 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		if (currentMember.isSetCarried() && currentMember.getCarried())
 			return false;
 		// "avatar" - can't pick up first member - it should follow you
-		if (currentMember.getParentMemberID()==null)
+		if (currentMember.getParentMemberID()==null) {
+			Toast.makeText(this, "Your first community member will always follow you", Toast.LENGTH_SHORT).show();
 			return false;
+		}
 		ClientState cs = BackgroundThread.getClientState(this);
 		if (cs==null)
 			return false;
 		if (!gameActive())
 			return false;
-		if (LocationUtils.getCurrentLocation(this)==null)
+		if (LocationUtils.getCurrentLocation(this)==null) {
+			Toast.makeText(this, "You cannot pick up this community member as your current location is not known", Toast.LENGTH_SHORT).show();
 			return false;
+		}
 		Location loc = cs.getLastLocation();
-		if (loc==null)
+		if (loc==null) {
+			Toast.makeText(this, "You cannot pick up this community member as your current location is not known", Toast.LENGTH_SHORT).show();
 			return false;
+		}
 		Position pos = currentMember.getPosition();
 		if (pos==null)
 			return false;
@@ -753,8 +766,10 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		l2.setLongitude(pos.getLongitude());
 		l2.setAltitude(pos.getElevation());
 		double dist = loc.distanceTo(l2);
-		if (dist>CARRY_DISTANCE_M)
+		if (dist>CARRY_DISTANCE_M) {
+			Toast.makeText(this, "You are too far away to move this community member", Toast.LENGTH_SHORT).show();
 			return false;
+		}
 		return true;
 	}
 	private static double CARRY_DISTANCE_M = 40;
@@ -851,6 +866,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				logState("nag gameEnding");
 				Toast.makeText(GameMapActivity.this, END_GAME_MESSAGE, Toast.LENGTH_LONG).show();
 				vibrate = true;
+				centreOnMyLocation(false);
 			}
 			else {
 				Location loc = LocationUtils.getCurrentLocation(GameMapActivity.this);
@@ -1100,6 +1116,8 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			}
 
 		}
+		else
+			Log.d(TAG,"carryCurrentMember: currentMember null");
 	}
 	private Client cache;
 	private QueuedMessage placeMemberMessage;
@@ -1204,8 +1222,10 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			CommunityPropsDialog myDialog = new CommunityPropsDialog(this, currentMember, new ReadyListener() {
 				@Override
 				public void ready(String name) {
+					// force check carry
+					checkCarry();
 				}				
-			});
+			}, true);
 	        myDialog.show();
 			
 			//updateAttributes(mmi.getMember());
