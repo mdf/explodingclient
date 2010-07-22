@@ -212,7 +212,13 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 						}
 					}
 				});
-
+			if (currentMessage!=null && currentMessage.getTitle() != null){
+				// show last message
+				contentTextView.setText(currentMessage.getTitle() + " [more..]");
+				contentTextView.setVisibility(TextView.VISIBLE);
+				contentTextView.bringToFront();
+				contentTextView.invalidate();
+			}
 			
 			mapView.setBuiltInZoomControls(true);
 			myLocationOverlay = new MyLocationOverlay(this, mapView);
@@ -1012,7 +1018,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		super.onPrepareDialog(id, dialog);
 	}
 	/** message to show if the user asks for details... */
-	private Message currentMessage;
+	private static Message currentMessage;
 	//	private Dialog newContentDialog;
 	//	private CountDownTimer newContentTimer;
 	protected void showNewEvent() {
