@@ -175,7 +175,7 @@ public class CommunityView extends LoggingActivity implements ClientStateListene
         }
 
         public long getItemId(int position) {
-            return 0;
+            return position;
         }
 
         // create a new ImageView for each item referenced by the Adapter
@@ -184,8 +184,8 @@ public class CommunityView extends LoggingActivity implements ClientStateListene
             ImageView imageView;
             if (convertView == null) {  // if it's not recycled, initialize some attributes
                 imageView = new ImageView(mContext);
-                imageView.setLayoutParams(new GridView.LayoutParams(100, 100));
-                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                imageView.setLayoutParams(new GridView.LayoutParams(120, 120));
+                imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 imageView.setPadding(2,2,2,2);//(8, 8, 8, 8);
  //               imageView.setOnClickListener(this);
                 /*
@@ -227,7 +227,12 @@ public class CommunityView extends LoggingActivity implements ClientStateListene
             return imageView;
         }
         
-        public void onClick(View view) {
+        @Override
+		public boolean hasStableIds() {
+			return false;
+		}
+
+		public void onClick(View view) {
         	((Button) view).setText("*");
         	
         }
@@ -281,7 +286,7 @@ public class CommunityView extends LoggingActivity implements ClientStateListene
 		Log.d(TAG,"Found "+members.size()+" members");
 		
 		imageAdapter.notifyDataSetChanged();
-		//gridview.invalidate();
+		gridview.requestLayout();
 	}
 	// END CMG
 }

@@ -26,6 +26,9 @@ import java.util.Map;
 import uk.ac.horizon.ug.exploding.client.BackgroundThread;
 import uk.ac.horizon.ug.exploding.client.model.Member;
 
+import android.R;
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -45,8 +48,12 @@ import android.util.Log;
  */
 public class MemberDrawableCache {
 	
+	public static enum Health { Low, Normal, High };
+	
 	private static final int WIDTH = 100;
 	private static final int HEIGHT = 100;
+	private static final Integer LOW_HEALTH = 2;
+	private static final Integer HIGH_HEALTH = 7;
 
 	/** get for Member */
 	public static synchronized Drawable getDrawable(Member member) {
@@ -68,7 +75,14 @@ public class MemberDrawableCache {
 		if (member.getLimbData()==null) {
 			Log.e(TAG,"Member with null limbData: "+member.getID());
 		}
-		MemberInfo mi = new MemberInfo(member.getLimbData(), PlayerColours.values()[member.isSetColourRef() ? member.getColourRef() % PlayerColours.values().length : 0].color(), member.getParentMemberID()==null);
+		Health health = Health.Normal;
+		if (member.isSetHealth()) {
+			if (member.getHealth()<=LOW_HEALTH)
+				health = Health.Low;
+			else if (member.getHealth()>=HIGH_HEALTH)
+				health = Health.High;
+		}
+		MemberInfo mi = new MemberInfo(member.getLimbData(), PlayerColours.values()[member.isSetColourRef() ? member.getColourRef() % PlayerColours.values().length : 0].color(), member.getParentMemberID()==null, health);
 		DrawableInfo di = cache.get(mi);
 		if (di==null) {
 			di = createDrawableInfo(mi);
@@ -83,7 +97,18 @@ public class MemberDrawableCache {
 	protected static final String TAG = "MemberDrawableCache";
 	private static final int AVATAR_RADIUS = 8;
 	private static final int AVATAR_RADIUS2 = 4;
-	static Drawable selectedDrawable = null;
+	private static final int HEART_RADIUS = 16;
+	public static Drawable lowHealthHeart, highHealthHeart, highHealthLargeHeart;
+	public static void init(Context context) {
+		try {
+			lowHealthHeart = context.getResources().getDrawable(uk.ac.horizon.ug.exploding.client.R.drawable.low_health);
+			highHealthHeart = context.getResources().getDrawable(uk.ac.horizon.ug.exploding.client.R.drawable.high_health);			
+			highHealthLargeHeart = context.getResources().getDrawable(uk.ac.horizon.ug.exploding.client.R.drawable.high_health_large);			
+		}
+		catch (Exception e) {
+			Log.e(TAG, "Problem loading heart images", e);
+		}
+	}
 	/**
 	 * @param mi
 	 * @return
@@ -94,8 +119,8 @@ public class MemberDrawableCache {
 		Body body = new Body(mi.color);
 		if (mi.limbInfo!=null)
 			body.setLimbInfo(mi.limbInfo);
-		float minY = body.getMinY();
 		float radius = body.getRadius();
+		float minY = -radius;//body.getMinY();
 
 		// community
 		Bitmap bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888);
@@ -115,6 +140,15 @@ public class MemberDrawableCache {
 			canvas.drawOval(new RectF(WIDTH/2-AVATAR_RADIUS, HEIGHT/2-AVATAR_RADIUS,WIDTH/2+AVATAR_RADIUS,HEIGHT/2+AVATAR_RADIUS), sp);
 			sp.setColor(0xffffffff);
 			canvas.drawOval(new RectF(WIDTH/2-AVATAR_RADIUS2, HEIGHT/2-AVATAR_RADIUS2,WIDTH/2+AVATAR_RADIUS2,HEIGHT/2+AVATAR_RADIUS2), sp);
+		} else if (mi.health != Health.Normal && lowHealthHeart!=null && highHealthHeart!=null) {
+			try {
+				Drawable heart = mi.health == Health.Low ? lowHealthHeart : highHealthHeart;
+				heart.setBounds(WIDTH/2-HEART_RADIUS, HEIGHT/2-HEART_RADIUS, WIDTH/2+HEART_RADIUS, HEIGHT/2+HEART_RADIUS);
+				heart.draw(canvas);
+			}
+			catch (Exception e) {
+				Log.e(TAG,"Adding heart", e);
+			}
 		}
 		Drawable d = new BitmapDrawable(bitmap);
 		d.setBounds(0, 0, WIDTH, HEIGHT);
@@ -152,6 +186,15 @@ public class MemberDrawableCache {
 			canvas.drawOval(new RectF(WIDTH/2-AVATAR_RADIUS, HEIGHT/2-AVATAR_RADIUS,WIDTH/2+AVATAR_RADIUS,HEIGHT/2+AVATAR_RADIUS), sp);
 			sp.setColor(0xffffffff);
 			canvas.drawOval(new RectF(WIDTH/2-AVATAR_RADIUS2, HEIGHT/2-AVATAR_RADIUS2,WIDTH/2+AVATAR_RADIUS2,HEIGHT/2+AVATAR_RADIUS2), sp);
+		} else if (mi.health != Health.Normal && lowHealthHeart!=null && highHealthHeart!=null) {
+			try {
+				Drawable heart = mi.health == Health.Low ? lowHealthHeart : highHealthHeart;
+				heart.setBounds(WIDTH/2-HEART_RADIUS, HEIGHT/2-HEART_RADIUS, WIDTH/2+HEART_RADIUS, HEIGHT/2+HEART_RADIUS);
+				heart.draw(canvas);
+			}
+			catch (Exception e) {
+				Log.e(TAG,"Adding heart", e);
+			}
 		}
 
 		StateListDrawable sld = new StateListDrawable() {
@@ -195,15 +238,17 @@ public class MemberDrawableCache {
 		String limbInfo;
 		int color;
 		boolean avatar;
+		Health health;
 		/**
 		 * @param limbInfo
 		 * @param color
 		 */
-		public MemberInfo(String limbInfo, int color, boolean avatar) {
+		public MemberInfo(String limbInfo, int color, boolean avatar, Health health) {
 			super();
 			this.limbInfo = limbInfo;
 			this.color = color;
 			this.avatar = avatar;
+			this.health = health;
 		}
 		@Override
 		public int hashCode() {
@@ -211,6 +256,8 @@ public class MemberDrawableCache {
 			int result = 1;
 			result = prime * result + (avatar ? 1231 : 1237);
 			result = prime * result + color;
+			result = prime * result
+					+ ((health == null) ? 0 : health.hashCode());
 			result = prime * result
 					+ ((limbInfo == null) ? 0 : limbInfo.hashCode());
 			return result;
@@ -227,6 +274,11 @@ public class MemberDrawableCache {
 			if (avatar != other.avatar)
 				return false;
 			if (color != other.color)
+				return false;
+			if (health == null) {
+				if (other.health != null)
+					return false;
+			} else if (!health.equals(other.health))
 				return false;
 			if (limbInfo == null) {
 				if (other.limbInfo != null)

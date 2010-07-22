@@ -72,7 +72,7 @@ public class CommunityPropsDialog extends Dialog {
         etAction[1] = (TextView) findViewById(R.id.com_attrib_action2_text_view);
         
         etName.setText(member.getName());
-        etStatus.setText(member.getCarried() ? "Carried" : "Placed");
+        etStatus.setText((member.getParentMemberID()==null ? "First, " : "")+(member.getCarried() ? "Carried" : "Placed"));
         setWidths(etHealth, member.getHealth());
         setWidths(etWealth, member.getWealth());
         setWidths(etAction, member.getAction());
