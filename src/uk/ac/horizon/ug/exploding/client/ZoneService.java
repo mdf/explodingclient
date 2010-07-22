@@ -55,7 +55,7 @@ public class ZoneService {
     	for(Object z : zones)
 		{
     		Zone zone = (Zone)z;
-    		if (zone.getName()!=null && ("main".equals(zone.getName().toLowerCase()) || zone.getName().startsWith("~")))
+			if (isGameZone(zone)) 
     			continue;
     		Position ps [] = zone.getCoordinates();
     		if (polygonContains(ps, latitude, longitude)){
@@ -64,6 +64,9 @@ public class ZoneService {
 		}
     	return null; 
     }
+	static public boolean isGameZone(Zone zone) {
+		return zone.getName()!=null && ("main".equals(zone.getName().toLowerCase()) || zone.getName().startsWith("~"));
+	}
 	// fudge
 	static final double MAX_GAME_AREA_M = 10000;
 	static public boolean outsideGameArea(Context context, double latitude, double longitude) {
@@ -75,7 +78,7 @@ public class ZoneService {
 		{
     		Zone zone = (Zone)z;
 			Position ps [] = zone.getCoordinates();
-			if (zone.getName()!=null && ("main".equals(zone.getName().toLowerCase()) || zone.getName().startsWith("~"))) {
+			if (isGameZone(zone)) {
 				// outside game area over-rides inside another area so you can pull it in indepedently of areas
 				if (!polygonContains(ps, latitude, longitude)){
 					

@@ -43,6 +43,7 @@ import uk.ac.horizon.ug.exploding.client.model.Member;
 import uk.ac.horizon.ug.exploding.client.model.Message;
 import uk.ac.horizon.ug.exploding.client.model.Player;
 import uk.ac.horizon.ug.exploding.client.model.Position;
+import uk.ac.horizon.ug.exploding.client.model.Zone;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
@@ -99,6 +100,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	private static Member currentMember;
 	private MapView mapView;
 	private TextView contentTextView;
+	private ZoneOverlay zoneOverlay;
 	
 	static enum DialogId { PLACE, PLACE_TO_SERVER, CARRY, CARRY_TO_SERVER /*, NEW_CONTENT*/ };
 	private ProgressDialog placeToServerPd;
@@ -248,6 +250,17 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 
 			mapView.getOverlays().add(myLocationOverlay);
 			mapView.getOverlays().add(itemOverlay);
+
+			Client cache = clientState.getCache();
+			if (cache!=null) {
+				List<Object> zones = cache.getFacts(Zone.class.getName()); 	
+				zoneOverlay = new ZoneOverlay(zones);
+				mapView.getOverlays().add(zoneOverlay);
+				Log.d(TAG,"Added ZoneOverlay with "+zones.size()+" zones");
+			}
+			else
+				Log.e(TAG,"Could not create zone overlay - no client cache");
+			
 			
 		}
 		catch (Exception e) {
@@ -647,6 +660,12 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		// TODO Auto-generated method stub
 		super.onResume();
 		startNagging();
+		
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean showZonesOnMap = preferences.getBoolean("showZonesOnMap", false);
+		boolean debugZonesOnMap = preferences.getBoolean("debugZonesOnMap", false);
+		zoneOverlay.setVisible(showZonesOnMap, debugZonesOnMap);
+		
 //		myLocationOverlay.enableCompass();
 		myLocationOverlay.enableMyLocation();
 		//		LocationUtils.registerOnThread(this, this, null);
