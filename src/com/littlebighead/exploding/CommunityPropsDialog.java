@@ -2,6 +2,7 @@ package com.littlebighead.exploding;
 
 import uk.ac.horizon.ug.exploding.client.GameMapActivity;
 import uk.ac.horizon.ug.exploding.client.R;
+import uk.ac.horizon.ug.exploding.client.logging.ActivityLogger;
 import uk.ac.horizon.ug.exploding.client.model.Member;
 import android.app.Dialog;
 import android.content.Context;
@@ -37,6 +38,8 @@ public class CommunityPropsDialog extends Dialog {
     TextView etName;
     private boolean justFinishOnEnd;
     
+    private ActivityLogger logger = new ActivityLogger(this);
+    
     public CommunityPropsDialog(Context context, Member member,
             ReadyListener readyListener) {
         super(context);
@@ -56,6 +59,7 @@ public class CommunityPropsDialog extends Dialog {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        logger.logOnCreate(this.getContext(), savedInstanceState);
         setContentView(R.layout.com_attrib_dialogue);
         //setTitle("Enter your Name ");
         Button buttonOK = (Button) findViewById(R.id.dismiss_member_props);
@@ -100,6 +104,7 @@ public class CommunityPropsDialog extends Dialog {
         public void onClick(View v) {
             GameMapActivity.setCurrentMember(member);
             CommunityPropsDialog.this.dismiss();
+            logger.log("memberGoToMap", "member", member.toString());
             if (!justFinishOnEnd) {
             	Intent intent = new Intent();
             	intent.setClass(CommunityPropsDialog.this.getContext(), GameMapActivity.class);
@@ -109,5 +114,21 @@ public class CommunityPropsDialog extends Dialog {
             readyListener.ready(String.valueOf(etName.getText()));
         }
     }
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		logger.logOnBackPressed();
+	}
+	@Override
+	protected void onStart() {
+		super.onStart();
+		logger.logOnStart();
+	}
+	@Override
+	protected void onStop() {
+		super.onStop();
+		logger.logOnStop();
+	}
 
 }

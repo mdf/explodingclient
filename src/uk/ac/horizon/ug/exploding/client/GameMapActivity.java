@@ -286,6 +286,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		logger.logOnDestroy();
 		BackgroundThread.removeClientStateListener(this);
 	}
 
@@ -1255,4 +1256,24 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		tv = (TextView)findViewById(R.id.WealthTextView);
 		tv.setText(member==null ? "-" : ""+member.getWealth());
 	}
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		logger.logOnBackPressed();
+	}
+	@Override
+	public void onOptionsMenuClosed(Menu menu) {
+		super.onOptionsMenuClosed(menu);
+		logger.logOnOptionsMenuClosed(menu);
+	}
+	@Override
+	protected void onStart() {
+		super.onStart();
+		logger.logOnStart();
+	}
+	@Override
+	protected void onStop() {
+		super.onStop();
+		logger.logOnStop();
+	}	
 }

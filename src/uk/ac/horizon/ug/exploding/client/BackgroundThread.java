@@ -78,8 +78,9 @@ public class BackgroundThread implements Runnable {
 	private BackgroundThread() {
 		super();
 	}
-	public static synchronized void setHandler(Handler h) {
+	public static synchronized void setHandler(Handler h, Context context2) {
 		handler = h;
+		context = context;
 	}
 	static synchronized Handler getHandler() {
 		return handler;
@@ -214,17 +215,8 @@ public class BackgroundThread implements Runnable {
 	//private static String server
 	/** attempt login - called from background thread, unsync. */
 	private static Context getContext() {
-		// TODO Auto-generated method stub
-		if (contextRef==null)
-		{
-			Log.e(TAG,"doLogin: contextRef==null");
-			setClientStatus(ClientStatus.ERROR_IN_SERVER_URL);
-			return null;
-		}
-		Context context = contextRef.get();
 		if (context==null) {
-			Log.e(TAG,"doLogin: context==null");
-			setClientStatus(ClientStatus.ERROR_IN_SERVER_URL);
+			Log.e(TAG,"getContext: context==null");
 			return null;			
 		}
 		return context;
@@ -251,14 +243,16 @@ public class BackgroundThread implements Runnable {
 	/** attempt login - called from background thread, unsync. */
 	private void doLogin() {
 		Context context = getContext();
-		if (context==null)
+		if (context==null) {
+			setClientStatus(ClientStatus.ERROR_IN_SERVER_URL);
 			return;
+		}
 		// check location providers
 		boolean providersOk = LocationUtils.locationProviderEnabled(context);
 		if (!providersOk) {
 			String error = LocationUtils.getLocationProviderError(context);
 			Log.e(TAG, "Location provider error: "+error);
-			setClientStatus(ClientStatus.ERROR_DOING_LOGIN, error);
+			setClientStatus(ClientStatus.ERROR_IN_SERVER_URL, error);
 			return;			
 		}
         // get device unique ID(s)
@@ -598,9 +592,9 @@ public class BackgroundThread implements Runnable {
 	/** client state */
 	private static ClientState currentClientState;
 	/** context */
-	private static WeakReference<Context> contextRef;
+	private static Context context;
 	/** check */
-	private static synchronized void checkThread(Context context) {
+	private static synchronized void checkThread(Context context2) {
 		if (currentClientState==null)
 			currentClientState = new ClientState(ClientStatus.CONFIGURING, GameStatus.UNKNOWN);
 //		if (singleton==null || !singleton.isAlive()) {
@@ -608,8 +602,9 @@ public class BackgroundThread implements Runnable {
 //			singleton = new Thread(new BackgroundThread());
 //			singleton.start();			
 //		}
-		if (contextRef==null || contextRef.get()==null) {
-			contextRef = new WeakReference<Context>(context);
+		if (context==null) {
+			context = context2;
+			Log.d(TAG,"Setting context on checkThread - late?!");
 //			PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(new SharedPreferenceChangeListener());
 		}
 		// TODO

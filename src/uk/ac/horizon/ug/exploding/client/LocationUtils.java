@@ -70,6 +70,10 @@ public class LocationUtils {
 	}
 
 	public static synchronized void updateRequired(Context context, boolean req) {
+		if (context==null) {
+			Log.e(TAG,"updateRequired called with null context - ignored");
+			return;
+		}
 		Log.d(TAG,"updateRequired("+req+")");
 		if (locationCallback==null) {
 			locationCallback = new LocationCallback(context);			
