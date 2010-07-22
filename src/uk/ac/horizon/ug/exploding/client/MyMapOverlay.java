@@ -23,6 +23,7 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 	private static final int MILLION = 1000000;
 	//private Drawable defaultMarker;
 	private List<Object> members;
+	private String playerID;
 	
 	public MyMapOverlay(Drawable defaultMarker, ClientState clientState) {
 		super(defaultMarker);
@@ -74,16 +75,16 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 				members = null;
 			else {
  				player = (Player)ps.get(0);
-
- 				// clone list
- 				List<Object> allMembers = clientState.getCache().getFacts(Member.class.getName());
- 				members = new LinkedList<Object>();
- 				for (Object m : allMembers) {
- 					Member member = (Member)m;
- 					if (!member.getCarried())	
- 						//player.getID().equals(member.getPlayerID()) && 
- 						members.add(member);
- 				}
+ 				playerID = player.getID();
+			}
+			// clone list
+			List<Object> allMembers = clientState.getCache().getFacts(Member.class.getName());
+			members = new LinkedList<Object>();
+			for (Object m : allMembers) {
+				Member member = (Member)m;
+				if (!member.getCarried())	
+					//player.getID().equals(member.getPlayerID()) && 
+					members.add(member);
 			}
 		}
 		Log.d(TAG,"Members changed: "+size()+" found");
@@ -153,8 +154,10 @@ public class MyMapOverlay extends ItemizedOverlay<MyMapItem> implements ClientSt
 	@Override
 	protected boolean hitTest(MyMapItem item, Drawable marker, int hitX,
 			int hitY) {
-		boolean hit = super.hitTest(item, marker, hitX, hitY);
 		Member member = item.getMember();
+		if (playerID!=null && !playerID.equals(member.getPlayerID()))
+			return false;
+		boolean hit = super.hitTest(item, marker, hitX, hitY);
 		if (hit && member!=null && member.getParentMemberID()==null) {
 			hitMyAvatar = item;
 			Log.d(TAG,"Suppress hitTest of myAvatar");
