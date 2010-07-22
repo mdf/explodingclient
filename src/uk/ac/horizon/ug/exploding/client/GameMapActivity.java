@@ -300,7 +300,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		if (clientState==null)
 			return;
 		if (clientState.isZoneChanged() || !isInitial)
-			zoneChanged(clientState.getZoneID());
+			zoneChanged(clientState.getZoneID(), clientState.isZoneChanged());
 		if (isInitial || clientState.getChangedTypes().contains(Message.class.getName()))
 			handleMessages(clientState);
 		if (isInitial || clientState.getChangedTypes().contains(Game.class.getName()))
@@ -396,14 +396,16 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	/**
 	 * @param zoneID
 	 */
-	protected void zoneChanged(String zoneID) {
+	protected void zoneChanged(String zoneID, boolean showToast) {
 		//		logger.log("Zone", "zoneID", zoneID);
 		Log.d(TAG, "Zone change to "+zoneID);
 		if (zoneID!=null) {
-			Vibrator vibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
-			if (vibrator!=null)
-				vibrator.vibrate(ZONE_VIBRATE_MS);
-			Toast.makeText(GameMapActivity.this, "You have entered "+zoneID, Toast.LENGTH_SHORT).show();
+			if (showToast) {
+				Vibrator vibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
+				if (vibrator!=null)
+					vibrator.vibrate(ZONE_VIBRATE_MS);
+				Toast.makeText(GameMapActivity.this, "You have now entered "+zoneID, Toast.LENGTH_SHORT).show();
+			}
 			// BEGIN ROBIN
 			TextView zoneTextView = (TextView)findViewById(R.id.ZoneTextView);
 			zoneTextView.setText("You are in: "+zoneID);
@@ -856,7 +858,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 
 	private static int NAG_INTERVAL_MS = 15000;
 	private static int NAG_VIBRATE_MS = 500;
-	private static String END_GAME_MESSAGE = "Please return to the Tramshed as quickly as possible.";
+	private static String END_GAME_MESSAGE = "The game is now over please return to The Tramshed";
 	private static String OUTSIDE_PLAYAREA_MESSAGE = "You are no longer in the game area, please walk back towards the centre of Woolwich";
 	private Runnable nagTimerTask = new Runnable() {
 		@Override
