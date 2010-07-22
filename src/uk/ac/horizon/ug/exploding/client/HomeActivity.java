@@ -96,7 +96,16 @@ public class HomeActivity extends LoggingActivity implements ClientStateListener
         //AudioUtils.play(R.raw.buzzing);
     }
     
-    @Override
+    /* (non-Javadoc)
+	 * @see uk.ac.horizon.ug.exploding.client.logging.LoggingActivity#onDestroy()
+	 */
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+        BackgroundThread.removeClientStateListener(this);
+	}
+
+	@Override
 	protected void onNewIntent(Intent intent) {
     	if (intent.getAction().equals(Intent.ACTION_MAIN) && 
     			intent.getCategories().contains(Intent.CATEGORY_LAUNCHER) && 
@@ -136,6 +145,7 @@ public class HomeActivity extends LoggingActivity implements ClientStateListener
 	private void play() {
 		Intent intent = new Intent();
 		intent.setClass(this, GameMapActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		startActivity(intent);
 	}
 	private void playIfReady() {

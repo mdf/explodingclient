@@ -106,7 +106,16 @@ public class CommunityView extends LoggingActivity implements ClientStateListene
 
     }
     
-    private class OnReadyListener implements CommunityPropsDialog.ReadyListener {
+    /* (non-Javadoc)
+	 * @see uk.ac.horizon.ug.exploding.client.logging.LoggingActivity#onDestroy()
+	 */
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		BackgroundThread.removeClientStateListener(this);
+	}
+
+	private class OnReadyListener implements CommunityPropsDialog.ReadyListener {
         @Override
         public void ready(String name) {
             //Toast.makeText(CommunityView.this, name, Toast.LENGTH_LONG).show();

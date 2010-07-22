@@ -47,6 +47,11 @@ public class GameStatusActivity extends LoggingActivity implements ClientStateLi
 		// initialise
 		clientStateChanged(BackgroundThread.getClientState(this));
 	}
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		BackgroundThread.removeClientStateListener(this);
+	}
 
 	@Override
 	public void clientStateChanged(final ClientState clientState) {

@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import android.content.Context;
@@ -450,15 +451,24 @@ public class BackgroundThread implements Runnable {
 		li.listener = new WeakReference<ClientStateListener>(listener);
 		li.flags = flags;
 		li.types = types;
-		listeners.add(li);
+		synchronized (listeners) {
+			listeners.add(li);
+		}
 	}
 	/** add listener */
 	public static void removeClientStateListener(ClientStateListener listener) {
-		for (int i=0; i<listeners.size(); i++) {
-			ClientStateListener l = listeners.get(i).listener.get();
-			if (l==null || l==listener) {
-				listeners.remove(i);
-				i--;
+		synchronized (listeners) {
+			for (int i=0; i<listeners.size(); i++) {
+				// carefully in case of race conditions...
+				ListenerInfo li = listeners.get(i);
+				WeakReference<ClientStateListener> lr = li.listener;
+				ClientStateListener l = lr!=null ? lr.get() : null;
+				if (l==null || l==listener) {
+					if (lr!=null)
+						lr.clear();
+					listeners.remove(i);
+					i--;
+				}
 			}
 		}
 	}
@@ -548,7 +558,12 @@ public class BackgroundThread implements Runnable {
 			LocationUtils.updateRequired(getContext(), true);	
 			AudioUtils.autoResume();
 		}
-		for (ListenerInfo li : listeners) {
+		List<ListenerInfo> lis = new LinkedList<ListenerInfo>();
+		synchronized (listeners) {
+			// safe clone
+			lis.addAll(listeners);
+		}
+		for (ListenerInfo li : lis) {
 			ClientStateListener listener = li.listener.get();
 			if (listener!=null) {
 				boolean stateMatch = false;

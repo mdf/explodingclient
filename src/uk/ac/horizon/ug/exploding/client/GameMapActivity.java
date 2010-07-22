@@ -98,7 +98,8 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	private MyMapOverlay itemOverlay;
 	private static Member currentMember;
 	private MapView mapView;
-
+	private TextView contentTextView;
+	
 	static enum DialogId { PLACE, PLACE_TO_SERVER, CARRY, CARRY_TO_SERVER /*, NEW_CONTENT*/ };
 	private ProgressDialog placeToServerPd;
 	private ProgressDialog carryToServerPd;
@@ -192,8 +193,9 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 
 
 			// END Robin's code
-			TextView textview = (TextView)findViewById(R.id.ContentTextView);
-			textview.setOnClickListener(new OnClickListener(){
+			contentTextView = (TextView)findViewById(R.id.map_message_text_view);
+			Log.d(TAG,"initialise contentTextView="+contentTextView+" in "+this);
+			contentTextView.setOnClickListener(new OnClickListener(){
 					public void onClick(View v){
 						if (currentMessage!=null) {
 							Intent myIntent = new Intent();
@@ -240,7 +242,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 
 			mapView.getOverlays().add(myLocationOverlay);
 			mapView.getOverlays().add(itemOverlay);
-
+			
 		}
 		catch (Exception e) {
 			Log.e(TAG, "Error loading map view", e);
@@ -255,6 +257,17 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		clientStateChanged(clientState, true);
 		centreOnMyLocation();
 	}
+	
+	
+	/* (non-Javadoc)
+	 * @see com.google.android.maps.MapActivity#onDestroy()
+	 */
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		BackgroundThread.removeClientStateListener(this);
+	}
+
 	private static final long ZONE_VIBRATE_MS = 500;
 
 	private String currentYear = null;
@@ -426,14 +439,18 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			Log.d(TAG,"show NEW_CONTENT dialog for "+currentMessage);
 			//showDialog(DialogId.NEW_CONTENT.ordinal());
 
-			TextView textview = (TextView)findViewById(R.id.ContentTextView);
+			//TextView textview = (TextView)findViewById(R.id.ContentTextView);
 			//if (currentMessage != null){
 				
-			if (currentMessage.getTitle() != null){
-				textview.setText(currentMessage.getTitle() + " [more..]");
-				textview.setVisibility(TextView.VISIBLE);
-				textview.invalidate();
+			if (currentMessage.getTitle() != null && contentTextView!=null){
+				contentTextView.setText(currentMessage.getTitle() + " [more..]");
+				contentTextView.setVisibility(TextView.VISIBLE);
+				contentTextView.bringToFront();
+				contentTextView.invalidate();
+				Log.d(TAG,"Show message "+currentMessage.getTitle()+" in "+contentTextView+" in "+this+" (shown="+contentTextView.isShown()+")");
 			}
+			else 
+				Log.e(TAG,"Problem showing content: "+currentMessage.getTitle()+" in "+contentTextView+" in "+this);
 		
 			//}
 			
@@ -624,7 +641,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		// TODO Auto-generated method stub
 		super.onResume();
 		startNagging();
-		myLocationOverlay.enableCompass();
+//		myLocationOverlay.enableCompass();
 		myLocationOverlay.enableMyLocation();
 		//		LocationUtils.registerOnThread(this, this, null);
 		itemOverlay.setFocus(null);

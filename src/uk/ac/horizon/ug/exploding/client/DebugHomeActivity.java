@@ -51,7 +51,17 @@ public class DebugHomeActivity extends Activity implements ClientStateListener  
         //AudioUtils.addSoundFile(this, R.raw.buzzing, new SoundAttributes(1.0f, 1.0f, true, 1.0f));
         //AudioUtils.play(R.raw.buzzing);
     }
-    /** create menu */
+    
+    /* (non-Javadoc)
+	 * @see android.app.Activity#onDestroy()
+	 */
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		BackgroundThread.removeClientStateListener(this);
+	}
+
+	/** create menu */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
     	MenuInflater inflater = getMenuInflater();    
