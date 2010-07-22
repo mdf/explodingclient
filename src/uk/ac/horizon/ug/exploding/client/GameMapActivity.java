@@ -216,13 +216,17 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			myLocationOverlay = new MyLocationOverlay(this, mapView);
 			myLocationOverlay.runOnFirstFix(new Runnable() {
 				public void run() {
-					centreOnMyLocation();
-
-					if (currentMember!=null) {
-						if (currentMember.isSetCarried() && currentMember.getCarried()) {					
-							askToPlace();
-						} 
-					}
+					mHandler.post(new Runnable() {
+						public void run() {
+							centreOnMyLocation();
+							Log.d(TAG,"onFirstFix(), currentLocation="+LocationUtils.getCurrentLocation(GameMapActivity.this));
+							if (currentMember!=null) {
+								if (currentMember.isSetCarried() && currentMember.getCarried()) {					
+									askToPlace();
+								} 
+							}
+						}
+					});
 				}
 			});
 			Resources res = getResources();
@@ -367,7 +371,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			Vibrator vibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
 			if (vibrator!=null)
 				vibrator.vibrate(ZONE_VIBRATE_MS);
-			Toast.makeText(GameMapActivity.this, "Entered zone "+zoneID, Toast.LENGTH_SHORT).show();
+			Toast.makeText(GameMapActivity.this, "You have entered "+zoneID, Toast.LENGTH_SHORT).show();
 			// BEGIN ROBIN
 			TextView zoneTextView = (TextView)findViewById(R.id.ZoneTextView);
 			zoneTextView.setText("You are in: "+zoneID);
@@ -751,7 +755,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				//        		  Log.i("limb position", Double.toString(limb.x));
 				//       	  }
 				// can't place immediately for now so push to community with a message
-				//Toast.makeText(this, "Your new community member will appear in a moment", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "Please wait until your new community member arrives", Toast.LENGTH_SHORT).show();
 
 				setCurrentMember(null);
 				Intent myIntent = new Intent();
@@ -796,7 +800,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	private static int NAG_INTERVAL_MS = 15000;
 	private static int NAG_VIBRATE_MS = 500;
 	private static String END_GAME_MESSAGE = "Please return to the Tramshed as quickly as possible.";
-	private static String OUTSIDE_PLAYAREA_MESSAGE = "You have left the game area; please go back towards the Tramshed.";
+	private static String OUTSIDE_PLAYAREA_MESSAGE = "You are no longer in the game area, please walk back towards the centre of Woolwich";
 	private Runnable nagTimerTask = new Runnable() {
 		@Override
 		public void run() {

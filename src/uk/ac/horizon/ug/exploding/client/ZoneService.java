@@ -71,31 +71,26 @@ public class ZoneService {
 		if (clientState==null || clientState.getCache()==null) 
 			return false;
 		List<Object> zones = clientState.getCache().getFacts(Zone.class.getName());
-		boolean outside = false;
     	for(Object z : zones)
 		{
     		Zone zone = (Zone)z;
 			Position ps [] = zone.getCoordinates();
 			if (zone.getName()!=null && ("main".equals(zone.getName().toLowerCase()) || zone.getName().startsWith("~"))) {
-				if (outside) 
-					Log.w(TAG,"More than one zone is main or ~... (i.e. game area)");
+				// outside game area over-rides inside another area so you can pull it in indepedently of areas
 				if (!polygonContains(ps, latitude, longitude)){
 					
 					// MAX range check?!
 					double distance = LocationUtils.getDistance(latitude, longitude, ps[0].getLatitude(), ps[0].getLongitude());
-					if (distance < MAX_GAME_AREA_M)
-						outside = true;
+					if (distance < MAX_GAME_AREA_M) {
+						return true;
+					}
 					else
 						Log.d(TAG,"outsideGameArea ignoring game area "+zone.getName()+": distance="+distance);
 				}	
     		}
-    		else {
-				if (polygonContains(ps, latitude, longitude))
-					return true;
-    		}
-
 		}
-    	return outside; 
+    	// not outside, then
+    	return false; 
 	}
 	/**
      * Checks if the Polygon contains a point.
