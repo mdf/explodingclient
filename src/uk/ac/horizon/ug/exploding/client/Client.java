@@ -184,9 +184,11 @@ public class Client {
 		return clientId;
 	}
 
-	protected int ackSeq = 0;
 	protected int seqNo = 1;
-	
+// move to selective Ack
+//  protected int ackSeq = 0;
+    protected List<Integer> ackSeqs = new LinkedList<Integer>();
+    
 	/** connect */
 //	public boolean connect(/*List<String> classNames*/) throws /*JSONException,*/ IOException {
 //		
@@ -535,13 +537,19 @@ public class Client {
 	}
 	/** poll 
 	 * @throws JSONException */
-	public List<Message> poll() throws IOException {
+	public List<Message> poll(int toFollow) throws IOException {
 		log("poll");
 		Message msg = new Message();
 		msg.setSeqNo(seqNo++);
 		msg.setType(MessageType.POLL.name());
-		//msg.setToFollow(0);
-		msg.setAckSeq(ackSeq);
+		msg.setToFollow(toFollow);
+        synchronized (ackSeqs) {
+            int ackSeqsInt [] = new int[ackSeqs.size()];
+            for (int i=0; i<ackSeqs.size(); i++)
+                    ackSeqsInt[i] = ackSeqs.get(i);
+            ackSeqs.clear();
+            msg.setAckSeqs(ackSeqsInt);
+        }
 		
 		QueuedMessage qm = new QueuedMessage();
 		qm.message = msg;
@@ -554,8 +562,12 @@ public class Client {
 		Set<String> changedTypes = new HashSet<String>();
 		synchronized (facts) {
 			for (Message message : messages) {
-				if (message.getSeqNo()>0 && message.getSeqNo()>ackSeq)
-					ackSeq = message.getSeqNo();
+				// selective ack
+				if (message.getSeqNo()>0) {
+					synchronized(ackSeqs) {
+						ackSeqs.add(message.getSeqNo());
+					}
+				}
 				MessageType messageType = MessageType.valueOf(message.getType());
 				if (messageType==MessageType.FACT_EX || messageType==MessageType.FACT_ADD) {
 					Object val = message.getNewVal();
