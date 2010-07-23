@@ -422,7 +422,7 @@ public class BackgroundThread implements Runnable {
 				setClientStatus(ClientStatus.POLLING, "Trying to send queued updates");	
 				client.sendQueuedMessages();
 				// force rapid poll?!
-				client.poll();
+				client.poll(getToFollow());
 				// success = good
 				setClientStatus(ClientStatus.IDLE, "Ready to play");			
 			}
