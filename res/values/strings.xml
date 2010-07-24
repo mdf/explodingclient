@@ -31,4 +31,16 @@
 <item>0</item>
 </string-array>
 
+<string-array name="preferences_http_timeout_names"><item>Short (15s)</item>
+<item>Medium (30s)</item>
+<item>Long (60s)</item>
+<item>Default (very long?)</item>
+</string-array>
+
+<string-array name="preferences_http_timeout_values"><item>15000</item>
+<item>30000</item>
+<item>60000</item>
+<item>0</item>
+</string-array>
+
 </resources>

@@ -44,6 +44,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 
@@ -214,12 +216,35 @@ public class BackgroundThread implements Runnable {
 	}
 	/** HTTP client */
 	private HttpClient httpClient;
+	private static HttpClient currentHttpClient;
+	private static int httpTimeout = 30000; // default default
 	/** get HTTP Client */
 	private synchronized HttpClient getHttpClient() {
 		if (httpClient!=null)
 			return httpClient;
 		httpClient = new DefaultHttpClient();
+		if (context!=null) {
+			httpTimeout = ExplodingPreferences.getHttpTimeout(context);
+		}
+		currentHttpClient = httpClient;
+		setHttpTimeout(httpClient, httpTimeout);
 		return httpClient;
+	}
+	public static void setHttpTimeout(int timeout) {
+		// called from getHttpClient and ExplodingPreferences
+		BackgroundThread.httpTimeout = timeout;
+		// watch out for races
+		HttpClient client = currentHttpClient;
+		if (client!=null)
+			setHttpTimeout(client, timeout);
+	}
+	private static void setHttpTimeout(HttpClient client, int timeout) {
+		Log.d(TAG,"Set HttpClient timeout to "+timeout+" for "+client+" ("+(client==currentHttpClient ? "current" : "NOT CURRENT")+")");
+		if (client==null)
+			return;
+		HttpParams params = client.getParams();
+		HttpConnectionParams.setConnectionTimeout(params, timeout);
+		HttpConnectionParams.setSoTimeout(params, timeout);
 	}
 	private String clientId;
 	/** conversation */
