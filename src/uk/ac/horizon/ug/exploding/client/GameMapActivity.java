@@ -24,6 +24,7 @@ import com.littlebighead.exploding.Body;
 import com.littlebighead.exploding.CommunityPropsDialog;
 import com.littlebighead.exploding.CommunityView;
 import com.littlebighead.exploding.Limb;
+import com.littlebighead.exploding.MemberDrawableCache;
 import com.littlebighead.exploding.CommunityPropsDialog.ReadyListener;
 
 import java.util.HashSet;
@@ -146,6 +147,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		logger.logOnCreate(this, savedInstanceState);
     	this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		try {
+			MemberDrawableCache.init(this);
 			Log.d(TAG, "Try to load map view");
 			setContentView(R.layout.map);
 			// BEGIN Robin's code - from com.littlebighead.exploding.GameMapView
@@ -249,7 +251,6 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			itemOverlay.setOnFocusChangeListener(this);
 
 			mapView.getOverlays().add(myLocationOverlay);
-			mapView.getOverlays().add(itemOverlay);
 
 			Client cache = clientState.getCache();
 			if (cache!=null) {
@@ -261,6 +262,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			else
 				Log.e(TAG,"Could not create zone overlay - no client cache");
 			
+			mapView.getOverlays().add(itemOverlay);
 			
 		}
 		catch (Exception e) {
@@ -284,6 +286,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		logger.logOnDestroy();
 		BackgroundThread.removeClientStateListener(this);
 	}
 
@@ -1253,4 +1256,24 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		tv = (TextView)findViewById(R.id.WealthTextView);
 		tv.setText(member==null ? "-" : ""+member.getWealth());
 	}
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		logger.logOnBackPressed();
+	}
+	@Override
+	public void onOptionsMenuClosed(Menu menu) {
+		super.onOptionsMenuClosed(menu);
+		logger.logOnOptionsMenuClosed(menu);
+	}
+	@Override
+	protected void onStart() {
+		super.onStart();
+		logger.logOnStart();
+	}
+	@Override
+	protected void onStop() {
+		super.onStop();
+		logger.logOnStop();
+	}	
 }

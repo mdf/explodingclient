@@ -50,8 +50,8 @@ public class DrawView extends View implements OnTouchListener {
 
     @Override
     public void onDraw(Canvas canvas) {
-    	this.canvW = canvas.getWidth()/2;
-    	this.canvH = canvas.getWidth()/2;
+    	this.canvW = getWidth()/2;
+    	this.canvH = getHeight()/2;
         canvas.translate(canvW,canvH);
         body.draw(canvas);
         if (Limb.curr != null) {

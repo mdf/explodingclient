@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Paint.Style;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.util.Log;
@@ -63,7 +64,20 @@ public class Body {
 		//drawCurves(false);
 		drawBaseCurves(color, 255);
 		drawCurves(color, true);
+		if (clear)
+			drawCentre(0xffffffff);
 		limbs[0].drawEyes(canvas);
+	}
+	private static int CENTRE_RADIUS = 50;
+	private void drawCentre(int color) {
+		Drawable mDrawable = MemberDrawableCache.highHealthLargeHeart;
+//        ShapeDrawable mDrawable = new ShapeDrawable(new OvalShape());
+//		Paint p = mDrawable.getPaint();
+//		p.setStyle(Style.FILL);
+//		p.setColor(color);
+//		p.setAlpha(0x80);
+		mDrawable.setBounds(-CENTRE_RADIUS, -CENTRE_RADIUS, CENTRE_RADIUS, CENTRE_RADIUS);
+		mDrawable.draw(canvas);
 	}
 	public void drawShadow(Canvas canvas, float margin) {
 		this.canvas = canvas;

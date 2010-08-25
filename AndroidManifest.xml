@@ -44,6 +44,7 @@
 
 <!--  END ROBIN  -->
 <activity android:name="com.littlebighead.exploding.TimeEventSmallDialog" android:theme="@android:style/Theme.Dialog" android:finishOnTaskLaunch="true" android:finishOnCloseSystemDialogs="true" android:launchMode="standard" android:clearTaskOnLaunch="true" android:screenOrientation="portrait"></activity>
+<activity android:name=".ClapperboardActivity" android:label="Current Device Information" android:launchMode="standard" android:screenOrientation="portrait"></activity>
 </application>
 
 

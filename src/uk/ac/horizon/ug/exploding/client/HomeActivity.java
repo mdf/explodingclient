@@ -83,7 +83,7 @@ public class HomeActivity extends LoggingActivity implements ClientStateListener
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         // END ROBIN
-        BackgroundThread.setHandler(handler);
+        BackgroundThread.setHandler(handler, this.getApplicationContext());
         setContentView(R.layout.main);
         Button start_button = (Button)findViewById(R.id.main_start_button);
         start_button.setOnClickListener(new OnClickListener() {

@@ -36,7 +36,7 @@ import android.view.MenuItem;
  */
 public class ActivityLogger {
 
-	public ActivityLogger(Activity activity) {
+	public ActivityLogger(Object activity) {
 		activityClass = activity.getClass();
 		activityHashCode = activity.hashCode();
 	}

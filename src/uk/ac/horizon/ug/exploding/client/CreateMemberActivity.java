@@ -103,11 +103,17 @@ public class CreateMemberActivity extends LoggingActivity implements ClientMessa
 			ClientState clientState = BackgroundThread.getClientState(this);
 			Position pos = new Position();
 			Location loc = clientState.getLastLocation();
-			pos.setLatitude(loc.getLatitude());
-			pos.setLongitude(loc.getLongitude());
-			pos.setElevation(loc.getAltitude());
-			member.setPosition(pos);
-			member.setZone(clientState.getZoneOrgID());
+			if (loc!=null) {
+				pos.setLatitude(loc.getLatitude());
+				pos.setLongitude(loc.getLongitude());
+				pos.setElevation(loc.getAltitude());
+				member.setPosition(pos);
+				member.setCarried(false);
+				member.setZone(clientState.getZoneOrgID());
+			}
+			else
+				member.setCarried(true);
+
 			cache = clientState.getCache();
 			
 			GameMapActivity.logAction("createMember.start", "member", member);

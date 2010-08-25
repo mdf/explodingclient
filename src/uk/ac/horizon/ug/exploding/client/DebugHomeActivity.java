@@ -37,14 +37,14 @@ import android.widget.TextView;
  * @author cmg
  *
  */
-public class DebugHomeActivity extends Activity implements ClientStateListener  {
+public class DebugHomeActivity extends LoggingActivity implements ClientStateListener  {
 	private static final String TAG = "DebugActivity";
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (BackgroundThread.getHandler()==null)
-        	BackgroundThread.setHandler(handler);
+        	BackgroundThread.setHandler(handler, this.getApplicationContext());
         setContentView(R.layout.debug);
         BackgroundThread.addClientStateListener(this, this, ClientState.Part.STATUS.flag());
         
@@ -96,6 +96,13 @@ public class DebugHomeActivity extends Activity implements ClientStateListener  
 		{
 			Intent intent = new Intent();
 			intent.setClass(this, GameStatusActivity.class);
+			startActivity(intent);
+			return true;
+		}			
+		case R.id.debug_menu_clapperboard:
+		{
+			Intent intent = new Intent();
+			intent.setClass(this, ClapperboardActivity.class);
 			startActivity(intent);
 			return true;
 		}			

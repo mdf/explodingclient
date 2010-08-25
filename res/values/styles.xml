@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<style name="debug64"><item name="android:textColor">#ffffff</item>
+<item name="android:textSize">64px</item>
+</style>
+<style name="debug48" parent="@style/debug64"><item name="android:textSize">48px</item>
+</style>
+<style name="debug40" parent="@style/debug64"><item name="android:textSize">40px</item>
+</style>
+<style name="debug24" parent="@style/debug64"><item name="android:textSize">24px</item>
+</style>
+</resources>

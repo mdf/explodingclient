@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 /**
  * @author cmg
@@ -74,11 +75,26 @@ public class ExplodingPreferences extends PreferenceActivity {
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 		return preferences.getString(PLAYER_NAME, "");
 	}
+	public static final String HTTP_TIMEOUT = "httpTimeout";
+	private static final String TAG = "ExplodingPreferences";
+	/** get device id */
+	public static int getHttpTimeout(Context context) {
+		try {
+			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+			return Integer.parseInt(preferences.getString(HTTP_TIMEOUT, "0"));
+		}
+		catch (Exception e) {
+			Log.e(TAG,"Getting http timeout", e);
+		}			
+		return 30000; // default?!
+	}
 
 	@Override
 	protected void onPause() {
 		logger.logOnPause();
 		super.onPause();
+		int timeout = getHttpTimeout(this);
+		BackgroundThread.setHttpTimeout(timeout);
 	}
 
 	@Override

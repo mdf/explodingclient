@@ -44,6 +44,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 
@@ -78,8 +80,9 @@ public class BackgroundThread implements Runnable {
 	private BackgroundThread() {
 		super();
 	}
-	public static synchronized void setHandler(Handler h) {
+	public static synchronized void setHandler(Handler h, Context context2) {
 		handler = h;
+		context = context;
 	}
 	static synchronized Handler getHandler() {
 		return handler;
@@ -199,14 +202,49 @@ public class BackgroundThread implements Runnable {
 		log("done");
 		Log.i(TAG, "Background thread "+Thread.currentThread()+" exiting (interrupted="+Thread.interrupted()+")");
 	}
+	private int getToFollow() {
+		SharedPreferences preferences = getSharedPreferences();
+		if (preferences!=null) {
+			try {
+				return Integer.parseInt(preferences.getString("pollToFollow", "0"));
+			}
+			catch (NumberFormatException e) {
+				Log.e(TAG, "Getting pollToFollow", e);
+			}
+		}
+		return 0;
+	}
 	/** HTTP client */
 	private HttpClient httpClient;
+	private static HttpClient currentHttpClient;
+	private static int httpTimeout = 30000; // default default
 	/** get HTTP Client */
 	private synchronized HttpClient getHttpClient() {
 		if (httpClient!=null)
 			return httpClient;
 		httpClient = new DefaultHttpClient();
+		if (context!=null) {
+			httpTimeout = ExplodingPreferences.getHttpTimeout(context);
+		}
+		currentHttpClient = httpClient;
+		setHttpTimeout(httpClient, httpTimeout);
 		return httpClient;
+	}
+	public static void setHttpTimeout(int timeout) {
+		// called from getHttpClient and ExplodingPreferences
+		BackgroundThread.httpTimeout = timeout;
+		// watch out for races
+		HttpClient client = currentHttpClient;
+		if (client!=null)
+			setHttpTimeout(client, timeout);
+	}
+	private static void setHttpTimeout(HttpClient client, int timeout) {
+		Log.d(TAG,"Set HttpClient timeout to "+timeout+" for "+client+" ("+(client==currentHttpClient ? "current" : "NOT CURRENT")+")");
+		if (client==null)
+			return;
+		HttpParams params = client.getParams();
+		HttpConnectionParams.setConnectionTimeout(params, timeout);
+		HttpConnectionParams.setSoTimeout(params, timeout);
 	}
 	private String clientId;
 	/** conversation */
@@ -214,17 +252,8 @@ public class BackgroundThread implements Runnable {
 	//private static String server
 	/** attempt login - called from background thread, unsync. */
 	private static Context getContext() {
-		// TODO Auto-generated method stub
-		if (contextRef==null)
-		{
-			Log.e(TAG,"doLogin: contextRef==null");
-			setClientStatus(ClientStatus.ERROR_IN_SERVER_URL);
-			return null;
-		}
-		Context context = contextRef.get();
 		if (context==null) {
-			Log.e(TAG,"doLogin: context==null");
-			setClientStatus(ClientStatus.ERROR_IN_SERVER_URL);
+			Log.e(TAG,"getContext: context==null");
 			return null;			
 		}
 		return context;
@@ -257,14 +286,16 @@ public class BackgroundThread implements Runnable {
 	/** attempt login - called from background thread, unsync. */
 	private void doLogin() {
 		Context context = getContext();
-		if (context==null)
+		if (context==null) {
+			setClientStatus(ClientStatus.ERROR_IN_SERVER_URL);
 			return;
+		}
 		// check location providers
 		boolean providersOk = LocationUtils.locationProviderEnabled(context);
 		if (!providersOk) {
 			String error = LocationUtils.getLocationProviderError(context);
 			Log.e(TAG, "Location provider error: "+error);
-			setClientStatus(ClientStatus.ERROR_DOING_LOGIN, error);
+			setClientStatus(ClientStatus.ERROR_IN_SERVER_URL, error);
 			return;			
 		}
         // get device unique ID(s)
@@ -400,7 +431,7 @@ public class BackgroundThread implements Runnable {
 		try {
 			updatePlayer();
 			client.sendQueuedMessages();
-			client.poll();
+			client.poll(getToFollow());
 			lastPollTime = System.currentTimeMillis();
 			// success = good
 			setClientStatus(ClientStatus.POLLING, "Ready to play");
@@ -416,7 +447,7 @@ public class BackgroundThread implements Runnable {
 			setClientStatus(ClientStatus.POLLING, "Trying to get updates");	
 			updatePlayer();
 			client.sendQueuedMessages();
-			client.poll();
+			client.poll(getToFollow());
 			// success = good
 			setClientStatus(ClientStatus.IDLE, "Ready to play");			
 		}
@@ -456,7 +487,7 @@ public class BackgroundThread implements Runnable {
 				setClientStatus(ClientStatus.POLLING, "Trying to send queued updates");	
 				client.sendQueuedMessages();
 				// force rapid poll?!
-				client.poll();
+				client.poll(getToFollow());
 				// success = good
 				setClientStatus(ClientStatus.IDLE, "Ready to play");			
 			}
@@ -638,9 +669,9 @@ public class BackgroundThread implements Runnable {
 	/** client state */
 	private static ClientState currentClientState;
 	/** context */
-	private static WeakReference<Context> contextRef;
+	private static Context context;
 	/** check */
-	private static synchronized void checkThread(Context context) {
+	private static synchronized void checkThread(Context context2) {
 		if (currentClientState==null)
 			currentClientState = new ClientState(ClientStatus.CONFIGURING, GameStatus.UNKNOWN);
 //		if (singleton==null || !singleton.isAlive()) {
@@ -648,8 +679,9 @@ public class BackgroundThread implements Runnable {
 //			singleton = new Thread(new BackgroundThread());
 //			singleton.start();			
 //		}
-		if (contextRef==null || contextRef.get()==null) {
-			contextRef = new WeakReference<Context>(context);
+		if (context==null) {
+			context = context2;
+			Log.d(TAG,"Setting context on checkThread - late?!");
 //			PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(new SharedPreferenceChangeListener());
 		}
 		// TODO
