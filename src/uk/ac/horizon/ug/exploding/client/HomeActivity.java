@@ -70,6 +70,8 @@ import android.widget.Toast;
  */
 public class HomeActivity extends LoggingActivity implements ClientStateListener {
 	private static final String TAG = "HomeActivity";
+	/** lobby launch intent action */
+	public static final String ACTION_LOBBY_LAUNCH = "uk.ac.horizon.ug.exploding.client.LOBBY_LAUNCH";
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -114,9 +116,15 @@ public class HomeActivity extends LoggingActivity implements ClientStateListener
     		startedFromHome = true;
     		Log.d(TAG,"onNewIntent(MAIN,LAUNCHER): "+intent);
     	}
+    	else if (intent.getAction().equals(ACTION_LOBBY_LAUNCH)) {
+    		startedFromHome = true;
+    		Log.d(TAG,"onNewIntent(LOBBY_LAUNCH): "+intent);
+    	}
     	else
     		Log.d(TAG,"onNewIntent: "+intent);
 		super.onNewIntent(intent);
+		// let onResume etc access the latest/current intent
+		setIntent(intent);
 	}
 
 	/** create menu */
@@ -509,6 +517,48 @@ public class HomeActivity extends LoggingActivity implements ClientStateListener
 		if (shutdownClient) {
 			preferences.edit().putBoolean("shutdownClient", false).commit();
 		}
+		
+		// new lobby launch?
+		if (startedFromHome && getIntent().getAction().equals(ACTION_LOBBY_LAUNCH)) {
+			Bundle b = getIntent().getExtras();
+			if (b.containsKey("playUrl")) {
+				String serverUrl = b.getString("playUrl");
+				Log.i(TAG,"LobbyLaunch update serverUrl to "+serverUrl);
+				//preferences.edit().putString("serverUrl", serverUrl).commit();
+				BackgroundThread.setLobbyServerUrl(serverUrl);
+			}
+			if (b.containsKey("nickname")) {
+				String playerName = b.getString("nickname");
+				Log.i(TAG,"LobbyLaunch update playerName to "+playerName);
+				preferences.edit().putString("playerName", playerName).commit();				
+			}
+			if (b.containsKey("conversationId")) {
+				String conversationId = b.getString("conversationId");
+				Log.i(TAG,"LobbyLaunch update conversationId to "+conversationId);
+				BackgroundThread.setLobbyConversationId(conversationId);
+			}
+			if (b.containsKey("gameId")) {
+				String gameId = b.getString("gameId");
+				Log.i(TAG,"LobbyLaunch update gameId to "+gameId);
+				BackgroundThread.setLobbyGameId(gameId);
+			}
+			if (b.containsKey("gameStatus")) {
+				String gameStatus = b.getString("gameStatus");
+				Log.i(TAG,"LobbyLaunch update gameStatus to "+gameStatus);
+				BackgroundThread.setLobbyGameStatus(gameStatus);
+			}
+			if (b.containsKey("clientId")) {
+				String clientId = b.getString("clientId");
+				Log.i(TAG,"LobbyLaunch update clientId to "+clientId);
+				BackgroundThread.setLobbyClientId(clientId);
+			}
+			restartClient = true;
+		}
+		else if (startedFromHome) {
+			// not lobby - reset?!
+			BackgroundThread.setLobbyConversationId(null);
+		}
+		
 		if (shutdownClient || restartClient) {
 			BackgroundThread.shutdown(this);
 		}

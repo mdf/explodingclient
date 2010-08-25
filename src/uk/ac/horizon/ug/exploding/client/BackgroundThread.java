@@ -237,6 +237,8 @@ public class BackgroundThread implements Runnable {
 		return preferences;
 	}
 	private String getServerUrl() {
+		if (usingLobby())
+			return lobbyServerUrl;
 		SharedPreferences preferences = getSharedPreferences();
 		if (preferences==null)
 			return null;
@@ -247,6 +249,10 @@ public class BackgroundThread implements Runnable {
 			return null;
 		}
 		return serverUrl;
+	}
+	/** lobby-based login? */
+	private boolean usingLobby() {
+		return lobbyConversationId!=null;
 	}
 	/** attempt login - called from background thread, unsync. */
 	private void doLogin() {
@@ -262,16 +268,50 @@ public class BackgroundThread implements Runnable {
 			return;			
 		}
         // get device unique ID(s)
-		clientId = ExplodingPreferences.getDeviceId(context);
+		if (usingLobby())
+			clientId = lobbyClientId;
+		else
+			clientId = ExplodingPreferences.getDeviceId(context);
 		String serverUrl = getServerUrl();
 		if (serverUrl==null)
 			return;
-        conversationId = GUIDFactory.newGUID(clientId);
+		if (usingLobby())
+			conversationId = lobbyConversationId;
+		else
+			conversationId = GUIDFactory.newGUID(clientId);
         SharedPreferences preferences = getSharedPreferences();
         if (preferences==null)
         	return;
         
         HttpClient httpClient = getHttpClient();
+        if (usingLobby()) {
+			synchronized (BackgroundThread.class) {
+				checkCurrentThread();
+
+				currentClientState.setGameStatus(GameStatus.valueOf(lobbyGameStatus));
+				// presumed
+				currentClientState.setLoginStatus(LoginReplyMessage.Status.OK);
+				// presumed
+				currentClientState.setLoginMessage("Welcome");
+				//fireClientStateChanged(currentClientState.clone());
+
+				if (currentClientState.getGameStatus()==GameStatus.ACTIVE ||
+								currentClientState.getGameStatus()==GameStatus.NOT_STARTED ||
+								currentClientState.getGameStatus()==GameStatus.ENDING) {
+					currentClientState.setClientStatus(ClientStatus.GETTING_STATE);
+				} else if (currentClientState.getGameStatus()==GameStatus.ENDED) {
+					// game is over - shouldn't ever actually be returned to login
+					currentClientState.setClientStatus(ClientStatus.STOPPED);
+				}
+				else
+					currentClientState.setClientStatus(ClientStatus.ERROR_DOING_LOGIN);
+
+				fireClientStateChanged(currentClientState.clone());
+				
+			}
+			// done lobby login
+			return;
+        }
 		HttpPost request = null;
 		try {
 			serverUrl = serverUrl+LOGIN_PATH;
@@ -711,5 +751,25 @@ public class BackgroundThread implements Runnable {
 	private static void addClientStateListener(ClientStateListener listener,
 			Context context, Set<String> types) {
 		addClientStateListener(listener, context, 0, types);
+	}
+	private static String lobbyClientId;
+	private static String lobbyConversationId;
+	private static String lobbyGameStatus;
+	private static String lobbyGameId;
+	private static String lobbyServerUrl;
+	public static void setLobbyConversationId(String conversationId) {
+		lobbyConversationId = conversationId;
+	}
+	public static void setLobbyGameId(String gameId) {
+		lobbyGameId = gameId;
+	}
+	public static void setLobbyGameStatus(String gameStatus) {
+		lobbyGameStatus = gameStatus;
+	}
+	public static void setLobbyClientId(String clientId2) {
+		lobbyClientId = clientId2;
+	}
+	public static void setLobbyServerUrl(String serverUrl) {
+		lobbyServerUrl = serverUrl;
 	}
 }

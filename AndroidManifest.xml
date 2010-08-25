@@ -8,7 +8,11 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        <intent-filter><action android:name="uk.ac.horizon.ug.exploding.client.LOBBY_LAUNCH"></action>
+
+<category android:name="android.intent.category.DEFAULT"></category>
+</intent-filter>
+</activity>
 
     <activity android:name=".ExplodingPreferences" android:label="Preferences" android:icon="@drawable/icon" android:allowTaskReparenting="false" android:launchMode="standard" android:screenOrientation="portrait">
 </activity>
