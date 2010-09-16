@@ -69,6 +69,11 @@ function get_lobbyclient() {
 	return undefined;
 }
 
+function log(msg) {
+	if (get_lobbyclient()!=undefined)
+		get_lobbyclient().log(msg);
+}
+
 // get game if dedicated lobbyclient
 function get_game() {
 	if (get_lobbyclient()==undefined)
@@ -220,7 +225,17 @@ function init_persistence() {
 	}
 	else if (get_lobbyclient()!=undefined) {
 		if (lobbyclient.getLocalStorage()!=undefined && lobbyclient.getLocalStorage()!=null) {
-			myLocalStorage = lobbyclient.getLocalStorage();
+			myLocalStorage = {};
+			// Java string is not a string?!
+			myLocalStorage.getItem = function(key) { 
+				var val = lobbyclient.getLocalStorage().getItem(key);
+				if (val==null)
+					return null;
+				if (val==undefined)
+					return undefined;
+				return String(val);
+			};
+			myLocalStorage.setItem = function(key,value) { lobbyclient.getLocalStorage().setItem(key,value); };
 			persistence_type = 'Lobbyclient';
 		}
 	}
@@ -344,6 +359,7 @@ function load_game_index() {
 	table.append('<tr><td>Loading...</td></tr>');
 	var data = {version:1,maxResults:0};
 	try {
+		log('Query req. '+$.toJSON(data)+' to '+queryUrl);
 		$.ajax({url: queryUrl, 
 			type: 'POST',
 			contentType: 'application/json',
@@ -351,6 +367,7 @@ function load_game_index() {
 			data: $.toJSON(data),
 			dataType: 'json',
 			success: function success(data, status) {
+			log('Query resp. '+$.toJSON(data));
 			update_game_index(data);
 		},
 		error: function error(req, status) {
@@ -628,7 +645,9 @@ function get_location_constraint() {
 // do search 
 function do_query() {
 	var query = {version:1};
-	query.clientId = get_client_id();
+	// deviceId
+	// TODO clientId
+	query.deviceId = get_client_id();
 	if (os!=null && $('input[name=includeClient]').attr('checked')==true) {
 		query.clientType = os[0];
 		if (os[1].length>0)
@@ -655,6 +674,7 @@ function do_query() {
 
 	var data = $.toJSON(query);
 	try {
+		log('Query req. '+data+' to '+queryUrl);
 		$.ajax({url: queryUrl, 
 			type: 'POST',
 			contentType: 'application/json',
@@ -662,6 +682,7 @@ function do_query() {
 			data: data,
 			dataType: 'json',
 			success: function success(data, status) {
+			log('Query resp. '+$.toJSON(data));
 			searching = false;
 			update_search_disabled();
 			update_instance_index(data);
@@ -770,19 +791,20 @@ function get_game_join_request(type) {
 function do_create() {
 	$('input[name=do_create]').attr('disabled', true);
 	var table = $('#create');
-	$('tr',table).remove();
-	table.append('<tr><td>Sending create game request...</td></tr>');
+	$('.temp',table).remove();
+	table.append('<tr class="temp"><td>Sending create game request...</td></tr>');
 	var request = get_game_join_request('NEW_INSTANCE');
 	// really, we need this!
 	if (instanceItem.firstStartTime!=undefined)
 		request.newInstanceStartTime = instanceItem.firstStartTime;
 	else {
 		var msg = 'Sorry - no start time provided';
-		table.append('<tr><td>'+msg+'</td></tr>');
+		table.append('<tr class="temp"><td>'+msg+'</td></tr>');
 		alert(msg);
 		return;
 	}
 	try {
+		log('New req. '+$.toJSON(request)+' to '+instanceItem.newInstanceUrl);
 		$.ajax({url: instanceItem.newInstanceUrl, 
     		type: 'POST',
     		contentType: 'application/json',
@@ -790,8 +812,9 @@ function do_create() {
     		data: $.toJSON(request),
     		dataType: 'json',
     		success: function success(data, status) {
+				log('New resp. '+$.toJSON(data));
 				$('input[name=do_join]').attr('disabled', false);
-				table.append('<tr><td>'+data.message+'</td></tr>');
+				table.append('<tr class="temp"><td>'+data.message+'</td></tr>');
 				if (data.status=='OK') {
 					// re-query! (for now)
 					show_query();
@@ -802,14 +825,14 @@ function do_create() {
 			error: function error(req, status) {
 				$('input[name=do_join]').attr('disabled', false);
 				var msg = 'Sorry - there was a problem ('+req.status+': '+status+')';
-				table.append('<tr><td>'+msg+'</td></tr>');
+				table.append('<tr class="temp"><td>'+msg+'</td></tr>');
 				alert(msg);
 			}
 		});
 	} catch (err) {
 		$('input[name=do_join]').attr('disabled', false);
 		var msg = 'Sorry - there was a problem ('+e.name+': '+e.message+')';
-		table.append('<tr><td>'+msg+'</td></tr>');
+		table.append('<tr class="temp"><td>'+msg+'</td></tr>');
 		alert(msg);
 	}
 }
@@ -878,10 +901,11 @@ function handle_play_ok(response) {
 function do_join() {
 	$('input[name=do_join]').attr('disabled', true);
 	var table = $('#join');
-	$('tr',table).remove();
-	table.append('<tr><td>Requesting to join game...</td></tr>');
+	$('.temp',table).remove();
+	table.append('<tr class="temp"><td>Requesting to join game...</td></tr>');
 	var request = get_game_join_request('PLAY');
 	try {
+		log('Join req. '+$.toJSON(request)+' to '+instanceItem.joinUrl);
 		$.ajax({url: instanceItem.joinUrl, 
     		type: 'POST',
     		contentType: 'application/json',
@@ -889,14 +913,15 @@ function do_join() {
     		data: $.toJSON(request),
     		dataType: 'json',
     		success: function success(data, status) {
+				log('Join resp. '+$.toJSON(data));
 				$('input[name=do_join]').attr('disabled', false);
 				var msg = data.message==undefined ? data.status : data.message;
-				table.append('<tr><td>'+msg+'</td></tr>');
+				table.append('<tr class="temp"><td>'+msg+'</td></tr>');
 				if (data.status=='TRY_LATER') 
 					;// no op
 				else if (data.status=='OK') {
 					handle_play_ok(data);
-					table.append('<tr><td>The client should be started!</td></tr>');
+					table.append('<tr class="temp"><td>The client should be started!</td></tr>');
 				}
 				else {
 					// some kind of error
@@ -906,14 +931,14 @@ function do_join() {
 			error: function error(req, status) {
 				$('input[name=do_join]').attr('disabled', false);
 				var msg = 'Sorry - there was a problem ('+req.status+': '+status+')';
-				table.append('<tr><td>'+msg+'</td></tr>');
+				table.append('<tr class="temp"><td>'+msg+'</td></tr>');
 				alert(msg);
 			}
 		});
 	} catch (err) {
 		$('input[name=do_join]').attr('disabled', false);
 		var msg = 'Sorry - there was a problem ('+e.name+': '+e.message+')';
-		table.append('<tr><td>'+msg+'</td></tr>');
+		table.append('<tr class="temp"><td>'+msg+'</td></tr>');
 		alert(msg);
 	}
 }

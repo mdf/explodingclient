@@ -592,7 +592,12 @@ public class HomeActivity extends LoggingActivity implements ClientStateListener
 			}
 			if (uri.getQueryParameter("clientId")!=null) {
 				String clientId = uri.getQueryParameter("clientId");
+				// truncate to 20 chars?
 				Log.i(TAG,"LobbyLaunch update clientId to "+clientId);
+				if (clientId.length()>20) {
+					clientId = clientId.substring(0,20);
+					Log.i(TAG,"LobbyLaunch truncate clientId to "+clientId);
+				}
 				BackgroundThread.setLobbyClientId(clientId);
 			}
 			restartClient = true;			

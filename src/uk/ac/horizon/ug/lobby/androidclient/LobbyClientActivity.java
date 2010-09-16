@@ -71,7 +71,7 @@ public class LobbyClientActivity extends Activity {
 		HashMap<String,String> values = new HashMap<String,String>();
 		
 		public synchronized String getItem(String key) {
-			Log.i(TAG,"getItem("+key+")");
+			Log.i(TAG,"getItem("+key+")="+values.get(key));
 			return values.get(key);
 		}
 		public synchronized void setItem(String key, String value) {
@@ -131,6 +131,9 @@ public class LobbyClientActivity extends Activity {
 				mWebView.loadUrl(url);//leave to webview, e.g. local resources
 			else
 				viewUrl(url);			
+		}
+		public void log(String msg) {
+			Log.i(TAG,"log: "+msg);
 		}
 	}	
 	
