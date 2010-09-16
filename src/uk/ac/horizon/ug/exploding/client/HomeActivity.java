@@ -34,6 +34,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnCancelListener;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -119,6 +120,11 @@ public class HomeActivity extends LoggingActivity implements ClientStateListener
     	else if (intent.getAction().equals(ACTION_LOBBY_LAUNCH)) {
     		startedFromHome = true;
     		Log.d(TAG,"onNewIntent(LOBBY_LAUNCH): "+intent);
+    	}
+    	else if (intent.getAction().equals(Intent.ACTION_VIEW) && 
+    			intent.getData()!=null && getString(R.string.gameUriScheme).equals(intent.getData().getScheme())) {
+    		startedFromHome = true;
+    		Log.d(TAG,"onNewIntent(VIEW,custom URI): "+intent);    		
     	}
     	else
     		Log.d(TAG,"onNewIntent: "+intent);
@@ -553,6 +559,43 @@ public class HomeActivity extends LoggingActivity implements ClientStateListener
 				BackgroundThread.setLobbyClientId(clientId);
 			}
 			restartClient = true;
+		}
+		else if (startedFromHome && getIntent().getAction().equals(Intent.ACTION_VIEW) && 
+    			getIntent().getData()!=null && getString(R.string.gameUriScheme).equals(getIntent().getData().getScheme())) {
+			// extract parameters
+			Uri uri = getIntent().getData();
+			if (uri.getQueryParameter("playUrl")!=null) {
+				String serverUrl = uri.getQueryParameter("playUrl");
+				Log.i(TAG,"LobbyLaunch update serverUrl to "+serverUrl);
+				//preferences.edit().putString("serverUrl", serverUrl).commit();
+				BackgroundThread.setLobbyServerUrl(serverUrl);
+			}
+			if (uri.getQueryParameter("nickname")!=null) {
+				String playerName = uri.getQueryParameter("nickname");
+				Log.i(TAG,"LobbyLaunch update playerName to "+playerName);
+				preferences.edit().putString("playerName", playerName).commit();				
+			}
+			if (uri.getQueryParameter("conversationId")!=null) {
+				String conversationId = uri.getQueryParameter("conversationId");
+				Log.i(TAG,"LobbyLaunch update conversationId to "+conversationId);
+				BackgroundThread.setLobbyConversationId(conversationId);
+			}
+			if (uri.getQueryParameter("gameId")!=null) {
+				String gameId = uri.getQueryParameter("gameId");
+				Log.i(TAG,"LobbyLaunch update gameId to "+gameId);
+				BackgroundThread.setLobbyGameId(gameId);
+			}
+			if (uri.getQueryParameter("gameStatus")!=null) {
+				String gameStatus = uri.getQueryParameter("gameStatus");
+				Log.i(TAG,"LobbyLaunch update gameStatus to "+gameStatus);
+				BackgroundThread.setLobbyGameStatus(gameStatus);
+			}
+			if (uri.getQueryParameter("clientId")!=null) {
+				String clientId = uri.getQueryParameter("clientId");
+				Log.i(TAG,"LobbyLaunch update clientId to "+clientId);
+				BackgroundThread.setLobbyClientId(clientId);
+			}
+			restartClient = true;			
 		}
 		else if (startedFromHome) {
 			// not lobby - reset?!
