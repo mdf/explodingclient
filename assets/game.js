@@ -394,6 +394,16 @@ function append_instance_table_item(table, item, ix) {
 	var subtitle = '';
 	if (item.subtitle!=undefined) 
 		subtitle = '<h4>'+item.subtitle+'<h4>';
+	var slot = '';
+	if (item.gameSlotId!=undefined) {
+		if (item.clientId==undefined) 
+			slot = '<h4>You have a reservation for this game</h4>';
+		else if (item.clientId==get_client_id())
+			slot = '<h4>You have a reservation for this device!</h4>';
+		else
+			slot = '<h4>You have a reservation for another device</h4>';
+
+	}
 	var times = '';
 	if (item.startTime!=undefined) {
 		times = '<p>'+uiTimeToString(item.startTime)+'-'+uiTimeToString(item.endTime)+'</p>';
@@ -420,7 +430,7 @@ function append_instance_table_item(table, item, ix) {
 		clients = clients+'</p>';
 	}
 	table.append('<tr><td>'+
-			title+subtitle+
+			title+slot+subtitle+
 			times+
 			clients+
 			'</td></tr>');							
