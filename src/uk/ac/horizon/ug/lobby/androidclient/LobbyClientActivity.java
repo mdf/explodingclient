@@ -52,10 +52,15 @@ public class LobbyClientActivity extends Activity {
         mWebView = (WebView) findViewById(R.id.lobbyclientWebview);
         mWebView.setBackgroundColor(0xff000000);
         WebSettings webSettings = mWebView.getSettings();
-        webSettings.setSavePassword(false);          
+        webSettings.setSavePassword(true);          
         webSettings.setSaveFormData(false);         
         webSettings.setJavaScriptEnabled(true);       
-        webSettings.setSupportZoom(false);      
+        webSettings.setSupportZoom(false);   
+        webSettings.setDatabaseEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setGeolocationEnabled(true);
+        webSettings.setUseWideViewPort(false);
+        webSettings.setUserAgentString(webSettings.getUserAgentString()+"; LobbyClientActivity 1.0");
         mWebView.setWebChromeClient(new MyWebChromeClient());
         mWebView.setWebViewClient(new MyWebViewClient());
 
@@ -66,6 +71,7 @@ public class LobbyClientActivity extends Activity {
     }
 
 	// JS interface for localStorage - minimal
+	// Hmm. Hopefully don't need this with database / dom storage enabled
 	class LocalStorageJavaScriptInterface {
 		// TODO persist
 		HashMap<String,String> values = new HashMap<String,String>();
@@ -117,11 +123,11 @@ public class LobbyClientActivity extends Activity {
 				game = new GameJavaScriptInterface();
 			return game;
 		}
-		public synchronized LocalStorageJavaScriptInterface getLocalStorage() {
-			if (localStorage==null)
-				localStorage = new LocalStorageJavaScriptInterface();
-			return localStorage;
-		}
+//		public synchronized LocalStorageJavaScriptInterface getLocalStorage() {
+//			if (localStorage==null)
+//				localStorage = new LocalStorageJavaScriptInterface();
+//			return localStorage;
+//		}
 		/** for some reason window.load doesn't seem to call the shouldOverrideUrlLoading method */
 		public void open(String url) {
 			Log.i(TAG,"load("+url+")");

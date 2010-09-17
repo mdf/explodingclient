@@ -371,8 +371,8 @@ function load_game_index() {
 			update_game_index(data);
 		},
 		error: function error(req, status) {
-			error_game_index(req.status);
-//			alert('Error doing query ('+req.status+': '+req.statusText+')');
+			error_game_index(status);
+//			alert('Error doing query ('+status+')');
 		}
 		});
 	} catch (err) {
@@ -692,7 +692,7 @@ function do_query() {
 			update_search_disabled();
 			var table = $('#list');
 			table.empty();
-			table.append('<tr><td>Error doing search ('+req.status+': '+req.statusText+')</td></tr>');
+			table.append('<tr><td>Error doing search ('+status+')</td></tr>');
 			alert('Sorry - there was a problem searching');
 		}
 		});
@@ -824,7 +824,7 @@ function do_create() {
 			},
 			error: function error(req, status) {
 				$('input[name=do_join]').attr('disabled', false);
-				var msg = 'Sorry - there was a problem ('+req.status+': '+status+')';
+				var msg = 'Sorry - there was a problem ('+status+')';
 				table.append('<tr class="temp"><td>'+msg+'</td></tr>');
 				alert(msg);
 			}
@@ -930,7 +930,7 @@ function do_join() {
 			},
 			error: function error(req, status) {
 				$('input[name=do_join]').attr('disabled', false);
-				var msg = 'Sorry - there was a problem ('+req.status+': '+status+')';
+				var msg = 'Sorry - there was a problem ('+status+')';
 				table.append('<tr class="temp"><td>'+msg+'</td></tr>');
 				alert(msg);
 			}

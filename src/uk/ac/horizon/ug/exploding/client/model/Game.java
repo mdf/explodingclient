@@ -141,6 +141,43 @@ public class Game
     this._name = null; 
   }
 
+  /** internal value - Optional string/id for marking a set/series of related games. 
+		May be used to filter game join/spectator requests.
+   */
+  protected java.lang.String _tag;
+  
+  /** getter - Optional string/id for marking a set/series of related games. 
+		May be used to filter game join/spectator requests.
+   */
+  public java.lang.String getTag()
+  {
+  
+    return _tag;
+    
+  }
+
+  /** setter - Optional string/id for marking a set/series of related games. 
+		May be used to filter game join/spectator requests.
+   */
+  public void setTag(java.lang.String tag)
+  {
+  
+    this._tag = tag;
+    
+  }
+
+  /** is set?
+   */
+  public boolean isSetTag() {
+    return this._tag != null; 
+  }
+
+  /** unset
+   */
+  public void unsetTag()  {
+    this._tag = null; 
+  }
+
   /** internal value - 
    */
   protected java.lang.Long _timeCreated;
@@ -300,6 +337,10 @@ public class Game
         (_name==null || oo._name==null ||
          !_name.equals(oo._name)))
       return false;
+    if (_tag!=oo._tag &&
+        (_tag==null || oo._tag==null ||
+         !_tag.equals(oo._tag)))
+      return false;
     if (_timeCreated!=oo._timeCreated &&
         (_timeCreated==null || oo._timeCreated==null ||
          !_timeCreated.equals(oo._timeCreated)))
@@ -325,6 +366,7 @@ public class Game
       if (_ID!=null) val = val ^ _ID.hashCode();
     if (_contentGroupID!=null) val = val ^ _contentGroupID.hashCode();
     if (_name!=null) val = val ^ _name.hashCode();
+    if (_tag!=null) val = val ^ _tag.hashCode();
     if (_timeCreated!=null) val = val ^ _timeCreated.hashCode();
     if (_gameTimeID!=null) val = val ^ _gameTimeID.hashCode();
     if (_year!=null) val = val ^ _year.hashCode();
@@ -356,6 +398,13 @@ public class Game
 	str.append("name=");
 	if (_name!=null) {
 	    str.append(_name.toString());
+	} else {
+	    str.append("null");
+	}
+    str.append(",");
+	str.append("tag=");
+	if (_tag!=null) {
+	    str.append(_tag.toString());
 	} else {
 	    str.append("null");
 	}

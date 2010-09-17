@@ -202,17 +202,18 @@ public class BackgroundThread implements Runnable {
 		log("done");
 		Log.i(TAG, "Background thread "+Thread.currentThread()+" exiting (interrupted="+Thread.interrupted()+")");
 	}
+	private static int DEFAULT_TO_FOLLOW = 30;
 	private int getToFollow() {
 		SharedPreferences preferences = getSharedPreferences();
 		if (preferences!=null) {
 			try {
-				return Integer.parseInt(preferences.getString("pollToFollow", "0"));
+				return Integer.parseInt(preferences.getString("pollToFollow", ""+DEFAULT_TO_FOLLOW));
 			}
 			catch (NumberFormatException e) {
 				Log.e(TAG, "Getting pollToFollow", e);
 			}
 		}
-		return 0;
+		return DEFAULT_TO_FOLLOW;
 	}
 	/** HTTP client */
 	private HttpClient httpClient;

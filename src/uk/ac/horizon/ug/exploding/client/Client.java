@@ -542,7 +542,9 @@ public class Client {
 		Message msg = new Message();
 		msg.setSeqNo(seqNo++);
 		msg.setType(MessageType.POLL.name());
-		msg.setToFollow(toFollow);
+		if (toFollow>0) {
+			msg.setToFollow(toFollow);
+		}
         synchronized (ackSeqs) {
             int ackSeqsInt [] = new int[ackSeqs.size()];
             for (int i=0; i<ackSeqs.size(); i++)
