@@ -12,6 +12,7 @@ import uk.ac.horizon.ug.exploding.client.R;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
@@ -25,6 +26,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.GeolocationPermissions.Callback;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -63,7 +65,12 @@ public class LobbyClientActivity extends Activity {
         webSettings.setUserAgentString(webSettings.getUserAgentString()+"; LobbyClientActivity 1.0");
         mWebView.setWebChromeClient(new MyWebChromeClient());
         mWebView.setWebViewClient(new MyWebViewClient());
-
+        String databasePath = this.getApplicationContext().getDir("database", Context.MODE_PRIVATE).getPath();
+        mWebView.getSettings().setDatabasePath(databasePath);
+        //??
+        String geolocationDatabasePath = this.getApplicationContext().getDir("geodatabase", Context.MODE_PRIVATE).getPath();
+        mWebView.getSettings().setGeolocationDatabasePath(geolocationDatabasePath);
+        
         mWebView.addJavascriptInterface(new LobbyclientJavaScriptInterface(), "lobbyclient");    
 
         Log.i(TAG,"Load lobbyHtmlUrl "+getString(R.string.lobbyHtmlUrl));
@@ -189,7 +196,15 @@ public class LobbyClientActivity extends Activity {
 			result.confirm();     
 			return true;     
 		}
-
+		/* (non-Javadoc)
+		 * @see android.webkit.WebChromeClient#onGeolocationPermissionsShowPrompt(java.lang.String, android.webkit.GeolocationPermissions.Callback)
+		 */
+		@Override
+		public void onGeolocationPermissionsShowPrompt(String origin,
+				Callback callback) {
+			// always allow permission
+	        callback.invoke(origin, true, false);
+	    }
 		/* (non-Javadoc)
 		 * @see android.webkit.WebChromeClient#onConsoleMessage(java.lang.String, int, java.lang.String)
 		 */
