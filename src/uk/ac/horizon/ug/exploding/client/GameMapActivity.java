@@ -350,7 +350,15 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		average.setWealth(0);
 		average.setAction(0);
 		average.setBrains(0);
+		String currentMemberId = currentMember!=null ? currentMember.getID() : null;
+		Member oldCurrentMember = currentMember;
+		setCurrentMember(null);
 		for (Member member : members) {
+			// TODO update currentMember?!
+			if (currentMemberId!=null && currentMemberId.equals(member.getID()))
+			{
+				currentMember = member;
+			}
 			if (member.isSetHealth())
 				average.setHealth(average.getHealth()+member.getHealth());
 			if (member.isSetWealth())
@@ -359,6 +367,10 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				average.setAction(average.getAction()+member.getAction());
 			if (member.isSetBrains())
 				average.setBrains(average.getBrains()+member.getBrains());
+		}
+		if (currentMember!=oldCurrentMember)
+		{
+			logState("currentMemberChanged", "currentMember", currentMember);
 		}
 		if (members.size()>0) {
 			average.setHealth(average.getHealth()/members.size());
@@ -373,6 +385,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		membersTextView.setText(""+members.size());		
 		logState("updateMembers", "members", members.size());
 		mapView.invalidate();
+		
 	}
 
 	/**
@@ -943,7 +956,6 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 						cache.cancelMessage(placeMemberMessage, true);
 					cache = null;
 					placeMemberMessage = null;
-					placedMember = null;
 				}
 			});
 			placeToServerPd = creatingPd;
@@ -992,7 +1004,6 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 						cache.cancelMessage(placeMemberMessage, true);
 					cache = null;
 					placeMemberMessage = null;
-					placedMember = null;
 				}
 			});
 			carryToServerPd = creatingPd;
@@ -1095,7 +1106,6 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			m.setCarried(true);
 			m.setPosition(currentMember.getPosition());
 			m.setZone(currentMember.getZone());
-			placedMember = m;
 
 			ClientState cs = BackgroundThread.getClientState(this);
 			if (cs==null) {
@@ -1126,7 +1136,6 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	}
 	private Client cache;
 	private QueuedMessage placeMemberMessage;
-	private Member placedMember;
 	/**
 	 * 
 	 */
@@ -1143,7 +1152,6 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			pos.setElevation(placeLocation.getAltitude());
 			m.setPosition(pos);
 			m.setZone(placeZone);
-			placedMember = m;
 
 			ClientState cs = BackgroundThread.getClientState(this);
 			if (cs==null) {
@@ -1181,14 +1189,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 
 		if (status==MessageStatusType.OK) {
 			logAction("carry/placeMember.ok");
-			// fiddle with cache?
-			ClientState cs = BackgroundThread.getClientState(this);
-			if (currentMember!=null && placedMember!=null && cs!=null) {
-				currentMember.setCarried(placedMember.getCarried());
-				currentMember.setPosition(placedMember.getPosition());
-				currentMember.setZone(placedMember.getZone());
-				itemOverlay.clientStateChanged(cs);
-			}
+			// fiddle with cache? NO
 			//Toast.makeText(this, "Done: the map will update in a moment", Toast.LENGTH_LONG).show();
 		}
 		else {
@@ -1197,7 +1198,6 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		}
 		// tidy up
 		placeMemberMessage = null;
-		placedMember = null;
 		cache = null;
 	}
 

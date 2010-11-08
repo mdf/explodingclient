@@ -75,6 +75,15 @@ public class ExplodingPreferences extends PreferenceActivity {
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 		return preferences.getString(PLAYER_NAME, "");
 	}
+	public static final String GAME_TAG = "gameTag";
+	/** get game tag */
+	public static String getGameTag(Context context) {
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+		String tag = preferences.getString(GAME_TAG, "");
+		if (tag==null || tag.length()==0)
+			return null;
+		return tag;
+	}
 	public static final String HTTP_TIMEOUT = "httpTimeout";
 	private static final String TAG = "ExplodingPreferences";
 	/** get device id */

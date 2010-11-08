@@ -7,7 +7,7 @@
     <string name="main_menu_retry_short">Retry</string>
     <string name="main_menu_retry">Retry server</string>
     <string name="hello">Hello World, HomeActivity!</string>
-    <string name="app_name">Exploding Places</string>
+    <string name="lobby_app_name">Exploding Places Lobby</string>
 
 <string-array name="preferences_poll_interval_names"><item>Short (5s)</item>
 <item>Medium (15s)</item>
@@ -43,4 +43,6 @@
 <item>0</item>
 </string-array>
 
+<string name="direct_app_name">Exploding Places Preset</string>
+<string name="app_name">Exploding Places</string>
 </resources>

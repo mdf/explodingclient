@@ -360,6 +360,7 @@ public class BackgroundThread implements Runnable {
 			login.setConversationId(conversationId);
 			login.setClientVersion(CLIENT_VERSION);
 			login.setClientType(CLIENT_TYPE);
+			login.setGameTag(ExplodingPreferences.getGameTag(context));
 			// TODO XPP3 driver?
 			XStream xs = new XStream(/*new DomDriver()*/);
 			xs.alias("login", LoginMessage.class);
