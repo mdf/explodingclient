@@ -19,6 +19,7 @@
  */
 package com.littlebighead.exploding;
 
+import uk.ac.horizon.ug.exploding.client.ApplicationActivity;
 import uk.ac.horizon.ug.exploding.client.R;
 import uk.ac.horizon.ug.exploding.client.logging.LoggingActivity;
 import android.app.Activity;
@@ -40,7 +41,7 @@ import android.widget.TextView;
  * @author cmg
  *
  */
-public class TimeEventSmallDialog extends LoggingActivity {
+public class TimeEventSmallDialog extends ApplicationActivity {
 
 	/* (non-Javadoc)
 	 * @see android.app.Dialog#onCreate(android.os.Bundle)

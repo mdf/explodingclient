@@ -91,10 +91,10 @@ public class BackgroundThread implements Runnable {
 	private static Thread singleton;
 	private long lastPollTime;
 	/** log from thread */
-	private void log(String message) {
+	private static void log(String message) {
 		log(message, null, null);
 	}
-	private void log(String message, String extraKey, String extraValue) {
+	private static void log(String message, String extraKey, String extraValue) {
 		try {
 			JSONStringer js = new JSONStringer();
 			js.object();
@@ -147,9 +147,14 @@ public class BackgroundThread implements Runnable {
 					case GETTING_STATE:
 						doGetState = true;
 						break;
-					case POLLING:
 					case IDLE:
+					case POLLING:
 					case ERROR_AFTER_STATE: {
+						if (shouldBePaused>0) {
+							currentClientState.setClientStatus(ClientStatus.PAUSED);
+							clientStateEvent = currentClientState.clone();
+							break;
+						}
 						doSendQueuedMessages = true;
 						int pollInterval = POLL_INTERVAL_MS;
 						SharedPreferences preferences = getSharedPreferences();
@@ -164,7 +169,16 @@ public class BackgroundThread implements Runnable {
 						if (System.currentTimeMillis()-lastPollTime > pollInterval) {
 							doPoll = true;
 						}
+						break;
 					}
+					case PAUSED:
+						if (shouldBePaused<=0) {
+							// go (back?!) to idle
+							currentClientState.setClientStatus(ClientStatus.IDLE);
+							clientStateEvent = currentClientState.clone();
+							break;
+						}
+						break;
 					}
 					// End Synchronized!
 				}
@@ -624,6 +638,7 @@ public class BackgroundThread implements Runnable {
 		case ERROR_IN_SERVER_URL:
 		case ERROR_GETTING_STATE:
 		case STOPPED:
+		case PAUSED:
 			LocationUtils.updateRequired(getContext(), false);
 			AudioUtils.autoPause();
 			break;
@@ -805,5 +820,16 @@ public class BackgroundThread implements Runnable {
 	}
 	public static void setLobbyServerUrl(String serverUrl) {
 		lobbyServerUrl = serverUrl;
+	}
+	/** should be paused? */
+	private static transient int shouldBePaused = 1;
+	/** set should be paused */
+	public static synchronized void setShouldBePaused(boolean b) {
+		if (b)
+			shouldBePaused++;
+		else {
+			shouldBePaused--;
+		}
+		log("setShouldBePaused", "shouldBePaused", ""+shouldBePaused);
 	}
 }

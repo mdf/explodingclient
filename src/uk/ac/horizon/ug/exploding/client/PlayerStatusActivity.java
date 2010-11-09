@@ -33,7 +33,7 @@ import android.widget.TextView;
  * @author cmg
  *
  */
-public class PlayerStatusActivity extends LoggingActivity implements ClientStateListener {
+public class PlayerStatusActivity extends ApplicationActivity implements ClientStateListener {
 
 	private static final String TAG = "PlayerStatus";
 

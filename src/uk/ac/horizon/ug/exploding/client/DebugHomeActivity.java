@@ -37,7 +37,7 @@ import android.widget.TextView;
  * @author cmg
  *
  */
-public class DebugHomeActivity extends LoggingActivity implements ClientStateListener  {
+public class DebugHomeActivity extends ApplicationActivity implements ClientStateListener  {
 	private static final String TAG = "DebugActivity";
     /** Called when the activity is first created. */
     @Override

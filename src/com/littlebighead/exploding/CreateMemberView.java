@@ -3,6 +3,7 @@ package com.littlebighead.exploding;
 
 import java.util.ArrayList;
 
+import uk.ac.horizon.ug.exploding.client.ApplicationActivity;
 import uk.ac.horizon.ug.exploding.client.BackgroundThread;
 import uk.ac.horizon.ug.exploding.client.Client;
 import uk.ac.horizon.ug.exploding.client.ClientMessageListener;
@@ -53,7 +54,7 @@ import android.view.ViewGroup.LayoutParams;
 
 
 
-public class CreateMemberView extends LoggingActivity implements ClientMessageListener {	//implements OnClickListener {
+public class CreateMemberView extends ApplicationActivity implements ClientMessageListener {	//implements OnClickListener {
     DrawView drawView;	
 	
     // BEGIN CMG

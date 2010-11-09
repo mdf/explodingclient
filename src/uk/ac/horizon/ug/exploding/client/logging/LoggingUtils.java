@@ -59,7 +59,7 @@ public class LoggingUtils {
 	/** log file */
 	private static File logFile;
 	/** log to android Log aswell */
-	private static boolean logToAndroid = false;
+	private static boolean logToAndroid = true;
 	/** init */
 	public static synchronized void init(Context context) {
 		String packageName = context.getApplicationInfo().packageName;

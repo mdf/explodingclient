@@ -6,6 +6,7 @@ import java.util.LinkedList;
 
 import java.util.List;
 
+import uk.ac.horizon.ug.exploding.client.ApplicationActivity;
 import uk.ac.horizon.ug.exploding.client.BackgroundThread;
 import uk.ac.horizon.ug.exploding.client.Client;
 import uk.ac.horizon.ug.exploding.client.ClientState;
@@ -40,7 +41,7 @@ import android.view.View.OnClickListener;
 
 
 
-public class CommunityView extends LoggingActivity implements ClientStateListener {	//implements OnClickListener {
+public class CommunityView extends ApplicationActivity implements ClientStateListener {	//implements OnClickListener {
 	private static final String TAG = "CommunityView";
 
 	public Dialog dialog;

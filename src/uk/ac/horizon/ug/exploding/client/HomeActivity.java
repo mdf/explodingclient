@@ -69,7 +69,7 @@ import android.widget.Toast;
  * @author robin
  *
  */
-public class HomeActivity extends LoggingActivity implements ClientStateListener {
+public class HomeActivity extends ApplicationActivity implements ClientStateListener {
 	private static final String TAG = "HomeActivity";
 	/** lobby launch intent action */
 	public static final String ACTION_LOBBY_LAUNCH = "uk.ac.horizon.ug.exploding.client.LOBBY_LAUNCH";
@@ -609,6 +609,8 @@ public class HomeActivity extends LoggingActivity implements ClientStateListener
 		
 		if (shutdownClient || restartClient) {
 			BackgroundThread.shutdown(this);
+			// clear old message, (etc?)
+			GameMapActivity.reset();
 		}
 		ClientState clientState = BackgroundThread.getClientState(this);
 

@@ -1,5 +1,6 @@
 package com.littlebighead.exploding;
 
+import uk.ac.horizon.ug.exploding.client.BackgroundThread;
 import uk.ac.horizon.ug.exploding.client.GameMapActivity;
 import uk.ac.horizon.ug.exploding.client.R;
 import uk.ac.horizon.ug.exploding.client.logging.ActivityLogger;
@@ -124,11 +125,13 @@ public class CommunityPropsDialog extends Dialog {
 	protected void onStart() {
 		super.onStart();
 		logger.logOnStart();
+		BackgroundThread.setShouldBePaused(false);
 	}
 	@Override
 	protected void onStop() {
 		super.onStop();
 		logger.logOnStop();
+		BackgroundThread.setShouldBePaused(true);
 	}
 
 }

@@ -1070,6 +1070,10 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	}
 	/** message to show if the user asks for details... */
 	private static Message currentMessage;
+	/** reset - from HomeActivity? */
+	public static void reset() {
+		currentMessage = null;
+	}
 	//	private Dialog newContentDialog;
 	//	private CountDownTimer newContentTimer;
 	protected void showNewEvent() {
@@ -1270,10 +1274,12 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	protected void onStart() {
 		super.onStart();
 		logger.logOnStart();
+		BackgroundThread.setShouldBePaused(false);
 	}
 	@Override
 	protected void onStop() {
 		super.onStop();
 		logger.logOnStop();
+		BackgroundThread.setShouldBePaused(true);
 	}	
 }

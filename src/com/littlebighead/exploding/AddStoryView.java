@@ -1,6 +1,7 @@
 package com.littlebighead.exploding;
 
 
+import uk.ac.horizon.ug.exploding.client.ApplicationActivity;
 import uk.ac.horizon.ug.exploding.client.BackgroundThread;
 import uk.ac.horizon.ug.exploding.client.Client;
 import uk.ac.horizon.ug.exploding.client.ClientMessageListener;
@@ -42,7 +43,7 @@ import android.view.View.OnClickListener;
 
 
 
-public class AddStoryView extends LoggingActivity implements ClientMessageListener {	//implements OnClickListener {
+public class AddStoryView extends ApplicationActivity implements ClientMessageListener {	//implements OnClickListener {
 	
     // BEGIN CMG
     static final String TAG = "AddStory";

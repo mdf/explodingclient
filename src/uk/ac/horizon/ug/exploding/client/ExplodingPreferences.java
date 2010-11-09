@@ -111,4 +111,23 @@ public class ExplodingPreferences extends PreferenceActivity {
 		logger.logOnResume();
 		super.onResume();
 	}
+
+	/* (non-Javadoc)
+	 * @see android.preference.PreferenceActivity#onStop()
+	 */
+	@Override
+	protected void onStop() {
+		super.onStop();
+		BackgroundThread.setShouldBePaused(true);
+	}
+
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onStart()
+	 */
+	@Override
+	protected void onStart() {
+		super.onStart();
+		BackgroundThread.setShouldBePaused(false);
+	}
+	
 }

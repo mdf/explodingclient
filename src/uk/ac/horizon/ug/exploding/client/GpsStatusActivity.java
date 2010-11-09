@@ -42,7 +42,7 @@ import android.widget.TextView;
  * @author cmg
  *
  */
-public class GpsStatusActivity extends LoggingActivity implements Listener, LocationListener {
+public class GpsStatusActivity extends ApplicationActivity implements Listener, LocationListener {
 
 	private static final String GPS_PROVIDER = "gps";
 	private static final String TAG = "GpsStatus";

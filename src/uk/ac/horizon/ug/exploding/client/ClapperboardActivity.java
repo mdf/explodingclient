@@ -40,7 +40,7 @@ import uk.ac.horizon.ug.exploding.client.logging.LoggingActivity;
  * @author cmg
  *
  */
-public class ClapperboardActivity extends LoggingActivity implements LocationListener {
+public class ClapperboardActivity extends ApplicationActivity implements LocationListener {
 
 	private static final String TAG = "Clapperboard";
 	private Handler mHandler = new Handler();

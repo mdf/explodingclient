@@ -1,6 +1,7 @@
 package com.littlebighead.exploding;
 
 
+import uk.ac.horizon.ug.exploding.client.ApplicationActivity;
 import uk.ac.horizon.ug.exploding.client.R;
 import uk.ac.horizon.ug.exploding.client.logging.LoggingActivity;
 import android.app.Activity;
@@ -24,7 +25,7 @@ import android.view.View.OnClickListener;
 
 
 
-public class TimeEventDialog extends LoggingActivity {	//implements OnClickListener {
+public class TimeEventDialog extends ApplicationActivity {	//implements OnClickListener {
 	
 	
     /** Called when the activity is first created. */

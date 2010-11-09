@@ -41,7 +41,7 @@ import android.widget.Toast;
  * @author cmg
  *
  */
-public class CreateMemberActivity extends LoggingActivity implements ClientMessageListener {
+public class CreateMemberActivity extends ApplicationActivity implements ClientMessageListener {
 
 	private static final String TAG = "CreateMember";
 
