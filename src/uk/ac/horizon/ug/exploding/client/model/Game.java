@@ -108,6 +108,46 @@ public class Game
   }
 
   /** internal value - 
+   * max length = 20.
+  
+   */
+  protected java.lang.String _gameConfigID;
+  
+  /** getter - 
+   * max length = 20.
+  
+   */
+  public java.lang.String getGameConfigID()
+  {
+  
+    return _gameConfigID;
+    
+  }
+
+  /** setter - 
+   * max length = 20.
+  
+   */
+  public void setGameConfigID(java.lang.String gameConfigID)
+  {
+  
+    this._gameConfigID = gameConfigID;
+    
+  }
+
+  /** is set?
+   */
+  public boolean isSetGameConfigID() {
+    return this._gameConfigID != null; 
+  }
+
+  /** unset
+   */
+  public void unsetGameConfigID()  {
+    this._gameConfigID = null; 
+  }
+
+  /** internal value - 
    */
   protected java.lang.String _name;
   
@@ -333,6 +373,10 @@ public class Game
         (_contentGroupID==null || oo._contentGroupID==null ||
          !_contentGroupID.equals(oo._contentGroupID)))
       return false;
+    if (_gameConfigID!=oo._gameConfigID &&
+        (_gameConfigID==null || oo._gameConfigID==null ||
+         !_gameConfigID.equals(oo._gameConfigID)))
+      return false;
     if (_name!=oo._name &&
         (_name==null || oo._name==null ||
          !_name.equals(oo._name)))
@@ -365,6 +409,7 @@ public class Game
     int val = 0;
       if (_ID!=null) val = val ^ _ID.hashCode();
     if (_contentGroupID!=null) val = val ^ _contentGroupID.hashCode();
+    if (_gameConfigID!=null) val = val ^ _gameConfigID.hashCode();
     if (_name!=null) val = val ^ _name.hashCode();
     if (_tag!=null) val = val ^ _tag.hashCode();
     if (_timeCreated!=null) val = val ^ _timeCreated.hashCode();
@@ -391,6 +436,13 @@ public class Game
 	str.append("contentGroupID=");
 	if (_contentGroupID!=null) {
 	    str.append(_contentGroupID.toString());
+	} else {
+	    str.append("null");
+	}
+    str.append(",");
+	str.append("gameConfigID=");
+	if (_gameConfigID!=null) {
+	    str.append(_gameConfigID.toString());
 	} else {
 	    str.append("null");
 	}
