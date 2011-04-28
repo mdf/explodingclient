@@ -126,7 +126,7 @@ public class LocationUtils {
 					long age = System.currentTimeMillis()-loc.getTime();
 					// mock position doesn't do time correctly, but doesn't have accuracy!
 					if (loc.hasAccuracy() && age > MAX_CURRENT_LOCATION_AGE_MS) {
-						Log.w(TAG, "Location provider "+provider+" last location is too old ("+age+" ms)");
+						Log.w(TAG, "Location provider "+provider+" last location is too old ("+age+" ms), with accuracy");
 					}
 					else {
 						// TODO accuracy requirement?
