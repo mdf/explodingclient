@@ -124,7 +124,8 @@ public class LocationUtils {
 				Location loc = locationManager.getLastKnownLocation(provider);
 				if (loc!=null) {
 					long age = System.currentTimeMillis()-loc.getTime();
-					if (age > MAX_CURRENT_LOCATION_AGE_MS) {
+					// mock position doesn't do time correctly, but doesn't have accuracy!
+					if (loc.hasAccuracy() && age > MAX_CURRENT_LOCATION_AGE_MS) {
 						Log.w(TAG, "Location provider "+provider+" last location is too old ("+age+" ms)");
 					}
 					else {
