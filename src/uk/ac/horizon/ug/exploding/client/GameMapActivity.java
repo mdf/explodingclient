@@ -874,8 +874,8 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 
 	private static int NAG_INTERVAL_MS = 15000;
 	private static int NAG_VIBRATE_MS = 500;
-	private static String END_GAME_MESSAGE = "The game is now over please return to The Tramshed";
-	private static String OUTSIDE_PLAYAREA_MESSAGE = "You are no longer in the game area, please walk back towards the centre of Woolwich";
+	private static String END_GAME_MESSAGE = "The game is now over please return to the starting location";
+	private static String OUTSIDE_PLAYAREA_MESSAGE = "You are no longer in the game area, please walk back towards the starting location";
 	private Runnable nagTimerTask = new Runnable() {
 		@Override
 		public void run() {
