@@ -324,7 +324,7 @@ public class LocationUtils {
 	 * @param latitude
 	 * @param longitude
 	 */
-	public static void fakeLocation(double latitude, double longitude) {
+	public static void fakeLocation(Context context, double latitude, double longitude) {
 		// TODO Auto-generated method stub
 		Location l = new Location("gps");
 		l.setLatitude(latitude);
@@ -332,6 +332,8 @@ public class LocationUtils {
 		l.setTime(System.currentTimeMillis());
 
 		fakeLocation = l;
-	}
+
+		ZoneService.updateLocation(context, l);
+}
 	
 }

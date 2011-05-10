@@ -141,7 +141,7 @@ public class ZoneOverlay extends Overlay {
 			if (fakeLocation) {
 				Toast.makeText(mapView.getContext(), "Fake location "+longitude+","+latitude, Toast.LENGTH_SHORT).show();
 				Log.d(TAG, "onTap: Fake location "+longitude+","+latitude);
-				LocationUtils.fakeLocation(latitude, longitude);
+				LocationUtils.fakeLocation(mapView.getContext(), latitude, longitude);
 			} else {
 				Zone zone = ZoneService.getZone(mapView.getContext(), latitude, longitude);
 				boolean outsideGameArea = ZoneService.outsideGameArea(mapView.getContext(), latitude, longitude);

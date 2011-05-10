@@ -441,6 +441,9 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	protected void zoneChanged(String zoneID, boolean showToast) {
 		//		logger.log("Zone", "zoneID", zoneID);
 		Log.d(TAG, "Zone change to "+zoneID);
+		// "game" zones
+		if ("main".equals(zoneID) || zoneID.startsWith("~"))
+			zoneID = null;
 		if (zoneID!=null) {
 			if (showToast) {
 				Vibrator vibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
@@ -448,12 +451,14 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 					vibrator.vibrate(ZONE_VIBRATE_MS);
 				Toast.makeText(GameMapActivity.this, "You have now entered "+zoneID, Toast.LENGTH_SHORT).show();
 			}
-			// BEGIN ROBIN
-			TextView zoneTextView = (TextView)findViewById(R.id.ZoneTextView);
-			zoneTextView.setText("You are in: "+zoneID);
-			logState("updateZone", "zoneID", zoneID);
-			// END ROBIN
 		}
+		else 
+			zoneID = "-";
+		// BEGIN ROBIN
+		TextView zoneTextView = (TextView)findViewById(R.id.ZoneTextView);
+		zoneTextView.setText("You are in: "+zoneID);
+		logState("updateZone", "zoneID", zoneID);
+		// END ROBIN
 	}		
 	/**
 	 * @param clientState
