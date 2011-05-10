@@ -53,6 +53,7 @@ public class ZoneOverlay extends Overlay {
 	
 	private boolean visible;
 	private boolean handleTouch;
+	private boolean fakeLocation;
 	
 	public ZoneOverlay(List<Object> zones)
 	{
@@ -65,9 +66,10 @@ public class ZoneOverlay extends Overlay {
 		}
 	}
 	
-	public synchronized void setVisible(boolean visible, boolean handleTouch) {
+	public synchronized void setVisible(boolean visible, boolean handleTouch, boolean fakeLocation) {
 		this.visible = visible;
 		this.handleTouch = handleTouch;
+		this.fakeLocation = fakeLocation;
 		Log.d(TAG,"setVisible("+visible+","+handleTouch+")");
 	}
 	
@@ -133,13 +135,19 @@ public class ZoneOverlay extends Overlay {
 	 */
 	@Override
 	public boolean onTap(GeoPoint p, MapView mapView) {
-		if (visible && handleTouch) {
+		if (visible && (handleTouch || fakeLocation)) {
 			double latitude = p.getLatitudeE6()*1.0/ONE_MILLION;
 			double longitude = p.getLongitudeE6()*1.0/ONE_MILLION;
-			Zone zone = ZoneService.getZone(mapView.getContext(), latitude, longitude);
-			boolean outsideGameArea = ZoneService.outsideGameArea(mapView.getContext(), latitude, longitude);
-			Toast.makeText(mapView.getContext(), "Zone: "+(zone==null ? "none" : zone.getName())+(outsideGameArea ? " (outside game area)" : " (inside game area)"), Toast.LENGTH_SHORT).show();
-			Log.d(TAG,"onTap: Zone: "+(zone==null ? "none" : zone.getName())+(outsideGameArea ? " (outside game area)" : " (inside game area)"));		
+			if (fakeLocation) {
+				Toast.makeText(mapView.getContext(), "Fake location "+longitude+","+latitude, Toast.LENGTH_SHORT).show();
+				Log.d(TAG, "onTap: Fake location "+longitude+","+latitude);
+				LocationUtils.fakeLocation(latitude, longitude);
+			} else {
+				Zone zone = ZoneService.getZone(mapView.getContext(), latitude, longitude);
+				boolean outsideGameArea = ZoneService.outsideGameArea(mapView.getContext(), latitude, longitude);
+				Toast.makeText(mapView.getContext(), "Zone: "+(zone==null ? "none" : zone.getName())+(outsideGameArea ? " (outside game area)" : " (inside game area)"), Toast.LENGTH_SHORT).show();
+				Log.d(TAG,"onTap: Zone: "+(zone==null ? "none" : zone.getName())+(outsideGameArea ? " (outside game area)" : " (inside game area)"));		
+			}
 		}
 		return super.onTap(p, mapView);
 	}

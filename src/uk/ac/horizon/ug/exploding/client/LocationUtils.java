@@ -51,6 +51,7 @@ public class LocationUtils {
 	private static int MAX_CURRENT_LOCATION_AGE_MS = 30000;
 	private static long lastCheck = 0;
 	private static int MIN_CHECK_INTERVAL = 1000;
+	private static Location fakeLocation = null;
 	
 	public static final String LOGTYPE_LOCATION = "LOCATION";// as for Aether's notebook
 	public static final String LOGTYPE_GPS_STATUS = "GpsStatus";// as for Aether's notebook
@@ -123,6 +124,8 @@ public class LocationUtils {
 			else {
 				Location loc = locationManager.getLastKnownLocation(provider);
 				if (loc!=null) {
+					if (fakeLocation!=null && fakeLocation.getTime() > loc.getTime())
+						return fakeLocation; // fake is newer?!
 					long age = System.currentTimeMillis()-loc.getTime();
 					// mock position doesn't do time correctly, but doesn't have accuracy!
 					if (loc.hasAccuracy() && age > MAX_CURRENT_LOCATION_AGE_MS) {
@@ -133,6 +136,8 @@ public class LocationUtils {
 						return loc;
 					}
 				}
+				else if (fakeLocation!=null)
+					return fakeLocation;
 			}
 		}
 		return null;		
@@ -314,6 +319,19 @@ public class LocationUtils {
 			}
 		}
 	
+	}
+	/**
+	 * @param latitude
+	 * @param longitude
+	 */
+	public static void fakeLocation(double latitude, double longitude) {
+		// TODO Auto-generated method stub
+		Location l = new Location("gps");
+		l.setLatitude(latitude);
+		l.setLongitude(longitude);
+		l.setTime(System.currentTimeMillis());
+
+		fakeLocation = l;
 	}
 	
 }

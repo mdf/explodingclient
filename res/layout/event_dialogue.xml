@@ -54,12 +54,18 @@
     	android:layout_marginRight="20px"
     	android:layout_marginBottom="10px"
     	android:layout_marginTop="10px">
+    	<Button android:text="&lt;" android:typeface="serif" android:layout_height="fill_parent"
+			android:layout_width="40dp" android:id="@+id/previous_message">
+ 		</Button>
 	    <Button
 android:text="OK"
 android:typeface="serif"
 android:layout_height="fill_parent"
-android:layout_width="fill_parent" android:id="@+id/dismiss_button">
+android:layout_width="200dp" android:id="@+id/dismiss_button">
 </Button>
+    	<Button android:text="&gt;" android:typeface="serif" android:layout_height="fill_parent"
+			android:layout_width="40dp" android:id="@+id/next_message">
+ 		</Button>
 
 		
     </LinearLayout>

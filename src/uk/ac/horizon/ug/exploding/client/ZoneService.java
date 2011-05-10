@@ -62,6 +62,17 @@ public class ZoneService {
     			return zone;
     		}
 		}
+    	// fall back to game zone?!
+    	for(Object z : zones)
+		{
+    		Zone zone = (Zone)z;
+			if (!isGameZone(zone)) 
+    			continue;
+    		Position ps [] = zone.getCoordinates();
+    		if (polygonContains(ps, latitude, longitude)){
+    			return zone;
+    		}
+		}
     	return null; 
     }
 	static public boolean isGameZone(Zone zone) {

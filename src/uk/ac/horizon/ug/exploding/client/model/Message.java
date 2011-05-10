@@ -23,6 +23,8 @@ public class Message
   public static final java.lang.String MSG_TIMELINE_CONTENT = "timeline_content";
   /** constant -  */
   public static final java.lang.String MSG_TIMELINE_CONTENT_GLOBAL = "timeline_content_global";
+  /** constant -  */
+  public static final java.lang.String MSG_PRIORITY_TIMELINE_CONTENT = "priority_timeline_content";
   /** no-arg cons */
   public Message()
   {
@@ -347,6 +349,28 @@ public class Message
    */
   public void unsetHandledTime()  {
     this._handledTime = null; 
+  }
+
+  /** internal value - 
+   */
+  protected java.lang.Float _gameTime;
+  
+  /** getter - 
+   */
+  public java.lang.Float getGameTime()
+  {
+  
+    return _gameTime;
+    
+  }
+
+  /** setter - 
+   */
+  public void setGameTime(java.lang.Float gameTime)
+  {
+  
+    this._gameTime = gameTime;
+    
   }
 
   /** equals */

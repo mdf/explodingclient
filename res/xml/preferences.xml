@@ -12,5 +12,6 @@
 
 <CheckBoxPreference android:title="Show Zones on Map" android:selectable="true" android:summary="Show game zones on map" android:key="showZonesOnMap" android:enabled="true"></CheckBoxPreference>
 <CheckBoxPreference android:title="Debug Zones on Map" android:selectable="true" android:summary="Give debug messages when touching zones on map" android:key="debugZonesOnMap" android:enabled="true"></CheckBoxPreference>
+<CheckBoxPreference android:title="Fake Location on Map" android:selectable="true" android:summary="Fake location updates when touching on map" android:key="fakeLocationOnMap" android:enabled="true"></CheckBoxPreference>
 <CheckBoxPreference android:title="Standalone Debug Mode" android:selectable="true" android:summary="Allow access to all actions" android:key="standaloneMode" android:enabled="true"></CheckBoxPreference>
 </PreferenceScreen>

@@ -25,9 +25,13 @@ import com.littlebighead.exploding.CommunityPropsDialog;
 import com.littlebighead.exploding.CommunityView;
 import com.littlebighead.exploding.Limb;
 import com.littlebighead.exploding.MemberDrawableCache;
+import com.littlebighead.exploding.TimeEventDialog;
 import com.littlebighead.exploding.CommunityPropsDialog.ReadyListener;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -139,6 +143,21 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			Log.e(TAG,"log("+action+","+extraKey+","+extraValue+")", e);
 		}
 	}
+	
+	// sort messages by game time
+	static class MessageComparator implements Comparator<Message> {
+
+		/* (non-Javadoc)
+		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+		 */
+		@Override
+		public int compare(Message m1, Message m2) {
+			if (m1.getGameTime()==null)
+				return m2.getGameTime()==null ? 0 : 1;
+			return m1.getGameTime().compareTo(m2.getGameTime());
+		}
+		
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -212,6 +231,13 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 							if (currentMessage.getDescription()!=null)
 								myIntent.putExtra("desc", currentMessage.getDescription());
 
+							List<Message> messages = new LinkedList<Message>();
+							messages.addAll(currentMessages);
+							Collections.sort(messages, new MessageComparator());
+							TimeEventDialog.setMessages( messages );
+							int mi = messages.indexOf(currentMessage);
+							myIntent.putExtra("messageIndex", mi);
+							
 							startActivity(myIntent);
 						}
 					}
@@ -450,11 +476,19 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			clientState.getCache().removeFactSilent(message);
 			// TODO add global content type
 			if (uk.ac.horizon.ug.exploding.client.model.Message.MSG_TIMELINE_CONTENT.equals(message.getType()) ||
-					uk.ac.horizon.ug.exploding.client.model.Message.MSG_TIMELINE_CONTENT_GLOBAL.equals(message.getType())) {
+					uk.ac.horizon.ug.exploding.client.model.Message.MSG_TIMELINE_CONTENT_GLOBAL.equals(message.getType()) ||
+					uk.ac.horizon.ug.exploding.client.model.Message.MSG_PRIORITY_TIMELINE_CONTENT.equals(message.getType())
+					) {
+				// stash
+				currentMessages.add(message);
 				// Pick one...
 				if (bestContentMessage==null)
 					bestContentMessage = message;
-				else if (uk.ac.horizon.ug.exploding.client.model.Message.MSG_TIMELINE_CONTENT_GLOBAL.equals(message.getType()))
+				else if (uk.ac.horizon.ug.exploding.client.model.Message.MSG_PRIORITY_TIMELINE_CONTENT.equals(message.getType()))
+					// priority > global event > non-global
+					bestContentMessage = message;
+				else if (uk.ac.horizon.ug.exploding.client.model.Message.MSG_TIMELINE_CONTENT_GLOBAL.equals(message.getType()) &&
+						!uk.ac.horizon.ug.exploding.client.model.Message.MSG_PRIORITY_TIMELINE_CONTENT.equals(bestContentMessage.getType()))
 					// global event > non-global
 					bestContentMessage = message;
 
@@ -689,7 +723,8 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean showZonesOnMap = preferences.getBoolean("showZonesOnMap", false);
 		boolean debugZonesOnMap = preferences.getBoolean("debugZonesOnMap", false);
-		zoneOverlay.setVisible(showZonesOnMap, debugZonesOnMap);
+		boolean fakeLocationOnMap = preferences.getBoolean("fakeLocationOnMap", false);
+		zoneOverlay.setVisible(showZonesOnMap, debugZonesOnMap, fakeLocationOnMap);
 		
 //		myLocationOverlay.enableCompass();
 		myLocationOverlay.enableMyLocation();
@@ -1070,9 +1105,17 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	}
 	/** message to show if the user asks for details... */
 	private static Message currentMessage;
+	private static List<Message> currentMessages = new LinkedList<Message>();
 	/** reset - from HomeActivity? */
 	public static void reset() {
 		currentMessage = null;
+		currentMessages = new LinkedList<Message>();
+	}
+	/** reset - from HomeActivity? */
+	public static void reset(Player p) {
+		Message cm = currentMessage;
+		if (cm!=null && p.getID()!=null && !p.getID().equals(cm.getPlayerID()))
+			reset();
 	}
 	//	private Dialog newContentDialog;
 	//	private CountDownTimer newContentTimer;

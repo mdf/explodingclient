@@ -643,6 +643,10 @@ public class Client {
 				BackgroundThread.setGameStatus(GameStatus.valueOf(game.getState()));
 			}
 		}
+		if (val instanceof Player) {
+			Player player = (Player)val;
+			GameMapActivity.reset(player);
+		}
 	}
 	/** remove a Fact from the cache without signalling state change */
 	public void removeFactSilent(Object fact) {
