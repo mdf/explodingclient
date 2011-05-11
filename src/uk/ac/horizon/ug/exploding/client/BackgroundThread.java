@@ -50,6 +50,7 @@ import org.json.JSONObject;
 import org.json.JSONStringer;
 
 import uk.ac.horizon.ug.exploding.client.logging.LoggingUtils;
+import uk.ac.horizon.ug.exploding.client.model.GameConfig;
 import uk.ac.horizon.ug.exploding.client.model.Player;
 import uk.ac.horizon.ug.exploding.client.model.Position;
 
@@ -595,6 +596,37 @@ public class BackgroundThread implements Runnable {
 			ClientState clone = currentClientState.clone();
 			Log.d(TAG,"setLocation("+zoneID+") - current="+currentClientState.getZoneID()+"/"+currentClientState.isZoneChanged()+", clone="+clone.getZoneID()+"/"+clone.isZoneChanged());
 			fireClientStateChanged(clone);
+		}
+	}
+	/** set game config */
+	public static synchronized void setGameConfig(GameConfig gc) {
+		if (singleton!=Thread.currentThread()) {
+			Log.e(TAG, "setGameConfig called by thread non-current thread");
+			throw new RuntimeException("setGameConfig called by thread non-current thread");
+		}
+		Context c = getContext();
+		if (c!=null) {
+			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+			if (gc.isSetClientShowZonesOnMap()) {
+				preferences.edit().putBoolean(ExplodingPreferences.SHOW_ZONES_ON_MAP, gc.getClientShowZonesOnMap()).commit();
+				Log.d(TAG,"Set showZonesOnMap to "+gc.getClientShowZonesOnMap());
+			}
+			if (gc.isSetClientHttpTimeout()) {
+				// as string (choice)
+				preferences.edit().putString(ExplodingPreferences.HTTP_TIMEOUT, gc.getClientHttpTimeout().toString()).commit();
+				Log.d(TAG,"Set httpTimeout to "+gc.getClientHttpTimeout());
+				setHttpTimeout(gc.getClientHttpTimeout());
+			}
+			if (gc.isSetClientPollInterval()) {
+				// as string (choice)
+				preferences.edit().putString(ExplodingPreferences.POLL_INTERVAL, gc.getClientPollInterval().toString()).commit();
+				Log.d(TAG,"Set pollInterval to "+gc.getClientPollInterval());
+			}
+			if (gc.isSetClientPollInterval()) {
+				// as string (choice)
+				preferences.edit().putString(ExplodingPreferences.POLL_TO_FOLLOW, gc.getClientPollToFollow().toString()).commit();
+				Log.d(TAG,"Set pollToFollow to "+gc.getClientPollToFollow());
+			}
 		}
 	}
 	/** set game status and fire */

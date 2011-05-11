@@ -116,7 +116,7 @@ public class MemberDrawableCache {
 	private static DrawableInfo createDrawableInfo(MemberInfo mi) {
 		DrawableInfo di = new DrawableInfo();
 
-		Body body = new Body(mi.color);
+		Body body = new Body(mi.color, new int[4], new int[4]);
 		if (mi.limbInfo!=null)
 			body.setLimbInfo(mi.limbInfo);
 		float radius = body.getRadius();

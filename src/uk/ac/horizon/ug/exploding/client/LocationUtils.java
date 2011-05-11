@@ -115,6 +115,9 @@ public class LocationUtils {
 		return null;		
 	}
 	public static Location getCurrentLocation(Context context) {
+		return getCurrentLocation(context, true);
+	}
+	public static Location getCurrentLocation(Context context, boolean allowFakeLocation) {
 		LocationManager locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
 		for (int pi=0; pi<PROVIDERS.length; pi++) {
 			String provider = PROVIDERS[pi];
@@ -124,7 +127,7 @@ public class LocationUtils {
 			else {
 				Location loc = locationManager.getLastKnownLocation(provider);
 				if (loc!=null) {
-					if (fakeLocation!=null && fakeLocation.getTime() > loc.getTime())
+					if (allowFakeLocation && fakeLocation!=null && fakeLocation.getTime() > loc.getTime())
 						return fakeLocation; // fake is newer?!
 					long age = System.currentTimeMillis()-loc.getTime();
 					// mock position doesn't do time correctly, but doesn't have accuracy!
@@ -136,7 +139,7 @@ public class LocationUtils {
 						return loc;
 					}
 				}
-				else if (fakeLocation!=null)
+				else if (allowFakeLocation && fakeLocation!=null)
 					return fakeLocation;
 			}
 		}
@@ -334,6 +337,8 @@ public class LocationUtils {
 		fakeLocation = l;
 
 		ZoneService.updateLocation(context, l);
-}
-	
+	}
+	public static void resetFakeLocation() {
+		fakeLocation = null;
+	}
 }

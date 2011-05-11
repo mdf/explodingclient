@@ -128,4 +128,41 @@ public class ZoneService {
 
 		return oddTransitions;
 	}
+
+	public static Location getDefaultLocation(Context context) {
+		ClientState clientState = BackgroundThread.getClientState(context);
+		if (clientState==null || clientState.getCache()==null) 
+			return null;
+		List<Object> zones = clientState.getCache().getFacts(Zone.class.getName());
+		double minLat=0, minLon=0, maxLat=0, maxLon=0;
+		boolean first = true;
+    	for(Object z : zones)
+		{
+    		Zone zone = (Zone)z;
+			Position ps [] = zone.getCoordinates();
+			for (int pi=0; ps!=null && pi<ps.length; pi++) {
+				Position p = ps[pi];
+				if (first) {
+					minLat = maxLat = p.getLatitude();
+					minLon = maxLon = p.getLongitude();
+					first = false;
+				}else {
+					if (p.getLatitude()>maxLat)
+						maxLat = p.getLatitude();
+					if (p.getLatitude()<minLat)
+						minLat = p.getLatitude();
+					if (p.getLongitude()>maxLon)
+						maxLon = p.getLongitude();
+					if (p.getLongitude()<minLon)
+						minLon = p.getLongitude();
+				}
+			}
+		}
+    	if (first)
+    		return null;
+    	Location loc = new Location("gps");
+    	loc.setLatitude((maxLat+minLat)/2);
+    	loc.setLongitude((maxLon+minLon)/2);
+		return loc;
+	}
 }

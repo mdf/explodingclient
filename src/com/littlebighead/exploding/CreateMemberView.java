@@ -14,6 +14,7 @@ import uk.ac.horizon.ug.exploding.client.MessageStatusType;
 import uk.ac.horizon.ug.exploding.client.R;
 import uk.ac.horizon.ug.exploding.client.Client.QueuedMessage;
 import uk.ac.horizon.ug.exploding.client.logging.LoggingActivity;
+import uk.ac.horizon.ug.exploding.client.model.GameConfig;
 import uk.ac.horizon.ug.exploding.client.model.Member;
 import uk.ac.horizon.ug.exploding.client.model.Player;
 import uk.ac.horizon.ug.exploding.client.model.Position;
@@ -286,7 +287,29 @@ public class CreateMemberView extends ApplicationActivity implements ClientMessa
         mainLayout.addView(drawLayout);
         drawLayout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,600));
 
-        drawView = new DrawView(this, getPlayerColor(), buttons);
+    	// defaults: health 2-5, others 0-7
+        int min[] = new int[] { 2, 0, 0, 0 };
+        int max[] = new int[] { 5, 7, 7, 7 };
+        GameConfig config = GameMapActivity.getGameConfig(this);
+        if (config!=null) {
+        	if (config.isSetClientCreateMaxHealth())
+        		max[0] = config.getClientCreateMaxHealth();
+        	if (config.isSetClientCreateMaxWealth())
+        		max[1] = config.getClientCreateMaxWealth();
+        	if (config.isSetClientCreateMaxKnowledge())
+        		max[2] = config.getClientCreateMaxKnowledge();
+        	if (config.isSetClientCreateMaxParticipation())
+        		max[3] = config.getClientCreateMaxParticipation();
+        	if (config.isSetClientCreateMinHealth())
+        		min[0] = config.getClientCreateMinHealth();
+        	if (config.isSetClientCreateMinWealth())
+        		min[1] = config.getClientCreateMinWealth();
+        	if (config.isSetClientCreateMinKnowledge())
+        		min[2] = config.getClientCreateMinKnowledge();
+        	if (config.isSetClientCreateMinParticipation())
+        		min[3] = config.getClientCreateMinParticipation();
+        }
+        drawView = new DrawView(this, getPlayerColor(), buttons, min, max);
         drawView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, 600));
         //mainLayout.addView(drawView);
         drawLayout.addView(drawView);

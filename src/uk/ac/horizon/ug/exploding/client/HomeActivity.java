@@ -95,6 +95,7 @@ public class HomeActivity extends ApplicationActivity implements ClientStateList
 		});
         BackgroundThread.addClientStateListener(this, this, ClientState.Part.STATUS.flag());
         startedFromHome = true;
+        LocationUtils.resetFakeLocation();
         //AudioUtils.addSoundFile(this, R.raw.buzzing, new SoundAttributes(1.0f, 1.0f, true, 1.0f));
         //AudioUtils.play(R.raw.buzzing);
     }
@@ -115,15 +116,18 @@ public class HomeActivity extends ApplicationActivity implements ClientStateList
     			(intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY)==0) {
     		// prompt for new game on re-launch
     		startedFromHome = true;
+            LocationUtils.resetFakeLocation();
     		Log.d(TAG,"onNewIntent(MAIN,LAUNCHER): "+intent);
     	}
     	else if (intent.getAction().equals(ACTION_LOBBY_LAUNCH)) {
     		startedFromHome = true;
+            LocationUtils.resetFakeLocation();
     		Log.d(TAG,"onNewIntent(LOBBY_LAUNCH): "+intent);
     	}
     	else if (intent.getAction().equals(Intent.ACTION_VIEW) && 
     			intent.getData()!=null && getString(R.string.gameUriScheme).equals(intent.getData().getScheme())) {
     		startedFromHome = true;
+            LocationUtils.resetFakeLocation();
     		Log.d(TAG,"onNewIntent(VIEW,custom URI): "+intent);    		
     	}
     	else

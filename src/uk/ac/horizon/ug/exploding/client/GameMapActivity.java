@@ -44,6 +44,7 @@ import uk.ac.horizon.ug.exploding.client.logging.ActivityLogger;
 import uk.ac.horizon.ug.exploding.client.logging.LoggingActivity;
 import uk.ac.horizon.ug.exploding.client.logging.LoggingUtils;
 
+import uk.ac.horizon.ug.exploding.client.model.GameConfig;
 import uk.ac.horizon.ug.exploding.client.model.Member;
 import uk.ac.horizon.ug.exploding.client.model.Message;
 import uk.ac.horizon.ug.exploding.client.model.Player;
@@ -62,6 +63,7 @@ import com.google.android.maps.ItemizedOverlay.OnFocusChangeListener;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -302,7 +304,7 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		BackgroundThread.addClientStateListener(this, this, ClientState.Part.ZONE.flag(), types);
 		ClientState clientState = BackgroundThread.getClientState(this);
 		clientStateChanged(clientState, true);
-		centreOnMyLocation();
+		//centreOnMyLocation();
 	}
 	
 	
@@ -665,12 +667,16 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 	}
 	private void centreOnMyLocation(boolean checkZoom) {
 		try {
+			// ignore fake locations as they come from the map anyway!
 			Location loc = LocationUtils.getCurrentLocation(this);
 			if (loc!=null) {
 				centreOn(loc.getLatitude(), loc.getLongitude(), checkZoom);
 			}
 			else
 			{
+				loc = ZoneService.getDefaultLocation(this);
+				if (loc!=null)
+					centreOn(loc.getLatitude(), loc.getLongitude(), checkZoom);
 				if (checkZoom)
 					Toast.makeText(this, "Current location unknown", Toast.LENGTH_SHORT).show();
 			}
@@ -736,17 +742,21 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		//		LocationUtils.registerOnThread(this, this, null);
 		itemOverlay.setFocus(null);
 		//updateAttributes(currentMember);
+		boolean centre = true;
 		if (currentMember!=null) {
 			if (currentMember.isSetCarried() && currentMember.getCarried()) {
 
 				centreOnMyLocation();
+				centre = false;
 				askToPlace();
 			} 
 			else {
 				if (currentMember.isSetPosition()) {
 					Position p = currentMember.getPosition();
-					if (p.isSetLatitude() && p.isSetLongitude())
+					if (p.isSetLatitude() && p.isSetLongitude()) {
 						centreOn(p.getLatitude(), p.getLongitude());
+						centre = false;
+					}
 				}				
 				int pos = itemOverlay.indexOf(currentMember);
 				if (pos>=0) {
@@ -758,6 +768,9 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				checkCarry();
 			}
 		}
+		if (centre)
+			centreOnMyLocation();
+
 	}		
 	private void askToPlace() {
 		if (currentMember==null || !currentMember.isSetCarried() || !currentMember.getCarried())
@@ -920,9 +933,13 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 		@Override
 		public void run() {
 			boolean vibrate = false;
+			GameConfig config = getGameConfig(GameMapActivity.this);
 			if (!gameActive()) {
 				logState("nag gameEnding");
-				Toast.makeText(GameMapActivity.this, END_GAME_MESSAGE, Toast.LENGTH_LONG).show();
+				String message = END_GAME_MESSAGE;
+				if (config!=null && config.isSetClientMessageEndGame())
+					message = config.getClientMessageEndGame();
+				Toast.makeText(GameMapActivity.this, message, Toast.LENGTH_LONG).show();
 				vibrate = true;
 				centreOnMyLocation(false);
 			}
@@ -930,7 +947,10 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 				Location loc = LocationUtils.getCurrentLocation(GameMapActivity.this);
 				if (loc!=null && ZoneService.outsideGameArea(GameMapActivity.this, loc.getLatitude(), loc.getLongitude())) {
 					logState("nag outOfGameZone");
-					Toast.makeText(GameMapActivity.this, OUTSIDE_PLAYAREA_MESSAGE, Toast.LENGTH_LONG).show();
+					String message = OUTSIDE_PLAYAREA_MESSAGE;
+					if (config!=null && config.isSetClientMessageOutOfBounds())
+						message = config.getClientMessageOutOfBounds();
+					Toast.makeText(GameMapActivity.this, message, Toast.LENGTH_LONG).show();
 					vibrate = true;
 				}
 			}
@@ -942,6 +962,20 @@ public class GameMapActivity extends MapActivity implements ClientStateListener,
 			mHandler.postDelayed(this, NAG_INTERVAL_MS);
 		}
 	};
+	public static GameConfig getGameConfig(Context context) {
+		ClientState cs = BackgroundThread.getClientState(context);
+		if (cs==null) {
+			Log.e(TAG,"getGameConfig: ClientState null");
+			return null;
+		}
+		Client cache = cs.getCache();
+		if (cache==null) {
+			Log.e(TAG,"getGameConfig: cache null");
+			return null;
+		}				
+		GameConfig config = (GameConfig)cache.getFirstFact(GameConfig.class.getName());
+		return config;
+	}
 	private static int NAG_DELAY_MS = 2000;
 	private void startNagging() {
 		mHandler.removeCallbacks(nagTimerTask);

@@ -56,6 +56,7 @@ import org.json.JSONStringer;
 import uk.ac.horizon.ug.exploding.client.logging.LoggingUtils;
 
 import uk.ac.horizon.ug.exploding.client.model.Game;
+import uk.ac.horizon.ug.exploding.client.model.GameConfig;
 import uk.ac.horizon.ug.exploding.client.model.Member;
 import uk.ac.horizon.ug.exploding.client.model.ModelUtils;
 import uk.ac.horizon.ug.exploding.client.model.Player;
@@ -643,11 +644,17 @@ public class Client {
 				BackgroundThread.setGameStatus(GameStatus.valueOf(game.getState()));
 			}
 		}
+		if (val instanceof GameConfig) {
+			GameConfig gc= (GameConfig)val;
+			BackgroundThread.setGameConfig(gc);
+		}
 		if (val instanceof Player) {
 			Player player = (Player)val;
 			GameMapActivity.reset(player);
 		}
 	}
+	
+	
 	/** remove a Fact from the cache without signalling state change */
 	public void removeFactSilent(Object fact) {
 		if (fact==null)
@@ -692,6 +699,10 @@ public class Client {
 		}
 		if (o instanceof Game) {
 			Game p = (Game)o;
+			return p.getID();
+		}
+		if (o instanceof GameConfig) {
+			GameConfig p = (GameConfig)o;
 			return p.getID();
 		}
 		Log.d(TAG,"getFactID for unknown class "+o.getClass().getName());

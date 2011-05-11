@@ -34,5 +34,6 @@ public class ModelUtils {
 		xs.alias("msg", Message.class);
 		xs.alias("game", Game.class);
 		xs.alias("event", TimelineEvent.class);
+		xs.alias("config", GameConfig.class);
 	}
 }

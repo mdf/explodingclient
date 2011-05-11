@@ -22,10 +22,16 @@ public class Body {
 	public static Bitmap bitmap;
 	private int color;
 	private float margin = 0;
-
-	public Body(int color) {
+	//begin cmg
+    private int min[], max[];
+    //end cmg
+	public Body(int color, int min[], int max[]) {
 		this.color = color;
 		limbs = new Limb[limbCnt];
+		// begin cmg
+        this.min = min;
+        this.max = max;
+        // end cmg
 		
 		double width = Math.random() * 100.0d + 55.0d;
 		double height = Math.random() * 100.0d + 60.0d;
@@ -221,16 +227,12 @@ public class Body {
 		
 		for (int i=0; i<dist.length; i++) {
 			attributes[i] = (int)(TOTAL_POINTS*dist[i]/total);
-			if (attributes[i] > 7)
-				attributes[i] = 7;
+			if (attributes[i] > max[i])
+				attributes[i] = max[i];
+			if (attributes[i] < min[i])
+				attributes[i] = min[i];
 		}
-		
-		// health
-		if (attributes[0] < 2)
-			attributes[0] = 2;
-		if (attributes[0] > 5)
-			attributes[0] = 5;
-		
+				
 		return attributes;
 	}
 	/** limb info as comma separated: x,y,w,h 

@@ -86,6 +86,9 @@ public class ExplodingPreferences extends PreferenceActivity {
 	}
 	public static final String HTTP_TIMEOUT = "httpTimeout";
 	private static final String TAG = "ExplodingPreferences";
+	public static final String SHOW_ZONES_ON_MAP = "showZonesOnMap";
+	public static final String POLL_INTERVAL = "pollInterval";
+	public static final String POLL_TO_FOLLOW = "pollToFollow";
 	/** get device id */
 	public static int getHttpTimeout(Context context) {
 		try {
